@@ -10,22 +10,6 @@ import (
 	"path/filepath"
 )
 
-type myStruct struct {
-	a int
-	b int
-	c int
-
-	myStruct2
-	m   map[string]string
-	arr []string
-}
-
-type myStruct2 struct {
-	a int
-	b int
-	c int
-}
-
 func main() {
 	fixDirectory(`.`)
 }
