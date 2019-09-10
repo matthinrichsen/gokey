@@ -15,6 +15,7 @@ func main() {
 }
 
 func fixDirectory(path string) {
+	fileSet := token.NewFileSet()
 	_ = filepath.Walk(path, func(filename string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
@@ -31,59 +32,85 @@ func fixDirectory(path string) {
 			return err
 		}
 
-		fileSet := token.NewFileSet()
+		fp, err := os.OpenFile(filename, os.O_WRONLY, info.Mode())
+		if err != nil {
+			return err
+		}
+		defer fp.Close()
+
 		f, err := parser.ParseFile(fileSet, filename, bytes, parser.ParseComments)
 		if err != nil {
 			return nil
 		}
 
+		nodesToRepair := []*ast.CompositeLit{}
 		ast.Inspect(f, func(n ast.Node) bool {
 			a, ok := n.(*ast.CompositeLit)
 			if !ok {
 				return true
 			}
 
+			needsRepair := false
+			for _, e := range a.Elts {
+				switch e.(type) {
+				case *ast.BasicLit:
+					needsRepair = true
+				case *ast.CompositeLit:
+					needsRepair = true
+				}
+			}
+			if needsRepair {
+				nodesToRepair = append(nodesToRepair, a)
+			}
+			return false
+		})
+
+		for _, a := range nodesToRepair {
 			names := getMemberNames(a)
-			_ = names
+			if len(names) < len(a.Elts) {
+				continue
+			}
+
 			for i, e := range a.Elts {
-				switch t := e.(type) {
+				switch e.(type) {
 				case *ast.BasicLit:
 					a.Elts[i] = &ast.KeyValueExpr{
 						Key: &ast.Ident{
 							Name: names[i],
 						},
-						Value: t,
+						Value: e,
 					}
 				case *ast.CompositeLit:
 					a.Elts[i] = &ast.KeyValueExpr{
 						Key: &ast.Ident{
 							Name: names[i],
 						},
-						Value: t,
+						Value: e,
 					}
 				}
 			}
-			return false
-		})
+		}
 
-		printer.Fprint(os.Stdout, fileSet, f)
+		if len(nodesToRepair) > 0 {
+			printer.Fprint(fp, fileSet, f)
+		}
 		return nil
 	})
 }
 
 func getMemberNames(a *ast.CompositeLit) []string {
 	id, ok := a.Type.(*ast.Ident)
-	if !ok {
+	if !ok || id == nil || id.Obj == nil {
 		return nil
 	}
 
 	ts, ok := id.Obj.Decl.(*ast.TypeSpec)
-	if !ok {
+	if !ok || ts == nil {
 		return nil
 	}
 
 	st, ok := ts.Type.(*ast.StructType)
-	if !ok {
+	if !ok || st == nil || st.Fields == nil {
 		return nil
 	}
 
