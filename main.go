@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"go/ast"
+	"go/format"
 	"go/importer"
 	"go/parser"
 	"go/printer"
@@ -157,7 +158,12 @@ func fixDirectory(path string) {
 
 		b := &bytes.Buffer{}
 		printer.Fprint(b, fileSet, brokenFile.f)
-		ioutil.WriteFile(brokenFile.filename, b.Bytes(), brokenFile.mode)
+
+		formatted, err := format.Source(b.Bytes())
+		if err != nil {
+			formatted = b.Bytes()
+		}
+		ioutil.WriteFile(brokenFile.filename, formatted, brokenFile.mode)
 
 	}
 }
