@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"go/ast"
 	"go/importer"
 	"go/parser"
@@ -162,13 +163,9 @@ func fixDirectory(path string) {
 			}
 		}
 
-		fp, err := os.OpenFile(brokenFile.filename, os.O_WRONLY, brokenFile.mode)
-		if err != nil {
-			continue
-		}
-		defer fp.Close()
-		printer.Fprint(fp, fileSet, brokenFile.f)
-		fp.Close()
+		b := &bytes.Buffer{}
+		printer.Fprint(b, fileSet, brokenFile.f)
+		ioutil.WriteFile(brokenFile.filename, b.Bytes(), brokenFile.mode)
 
 	}
 }
