@@ -14,14 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/matthinrichsen/gokey/tests"
-	wat "github.com/matthinrichsen/gokey/tests"
 )
-
-var _ tests.MyStruct
-var _ = tests.MyStruct2{tests.MyStruct3{}}
-var _ = wat.MyStruct2{wat.MyStruct3{}}
 
 func main() {
 	fixDirectory(``)
