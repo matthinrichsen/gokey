@@ -1,0 +1,14 @@
+package tests
+
+import (
+	"errors"
+	"log"
+
+	"github.com/matthinrichsen/gokey/tests/anotherPackage"
+)
+
+func lookAtMyTerribleFunction() {
+	a := anotherPackage.LastStruct{Int: 2}
+	s := MyStruct{a: 1, b: 2, c: 3, m: map[string]string{}, arr: []int{}, MyStruct2: MyStruct2{MyStruct3{errors.New(`implements Error()`)}}, LastStruct: anotherPackage.LastStruct{1}, LS: a}
+	log.Println(s, a)
+}
