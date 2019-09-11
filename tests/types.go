@@ -32,5 +32,11 @@ type MyStruct3 struct {
 	someInterface
 }
 
+type MyStruct4 struct {
+	a     int16
+	error // embedding native go type
+}
+
 var withinTheSameFile = MyStruct2{MyStruct3{errors.New(`wazzup`)}}
 var withinTheSameFile2 = MyStruct3{errors.New(`wazzup`)}
+var withinTheSameFile3 = MyStruct4{1, errors.New(`wazzup`)}
