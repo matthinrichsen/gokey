@@ -148,6 +148,7 @@ func fixDirectory(path string) {
 						Key: &ast.Ident{
 							Name: names[i],
 						},
+						Colon: brokenFile.f.Pos(),
 					}
 				case *ast.CompositeLit:
 					n.Elts[i] = &ast.KeyValueExpr{
@@ -155,6 +156,7 @@ func fixDirectory(path string) {
 						Key: &ast.Ident{
 							Name: names[i],
 						},
+						Colon: brokenFile.f.Pos(),
 					}
 				}
 			}
