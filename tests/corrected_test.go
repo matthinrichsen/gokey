@@ -2,35 +2,41 @@ package tests
 
 import (
 	"io/ioutil"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCorrection_BadFunction(t *testing.T) {
-	expectation, err := ioutil.ReadFile(`bad_function.expected`)
-	require.NoError(t, err)
-
+func TestCorrection(t *testing.T) {
 	out, err := exec.Command(`gokey`).CombinedOutput()
 	require.NoError(t, err, string(out))
 	assert.Empty(t, out)
 
-	bytes, err := ioutil.ReadFile(`bad_function.go`)
-	require.NoError(t, err)
-	assert.Equal(t, string(expectation), string(bytes))
-}
+	err = filepath.Walk(`.`, func(fp string, info os.FileInfo, err error) error {
+		require.NoError(t, err)
 
-func TestCorrection_StructDefs(t *testing.T) {
-	expectation, err := ioutil.ReadFile(`types.expected`)
-	require.NoError(t, err)
+		ext := filepath.Ext(fp)
+		if info.IsDir() || ext != `.go` || strings.HasSuffix(fp, `_test.go`) {
+			return nil
+		}
 
-	out, err := exec.Command(`gokey`).CombinedOutput()
-	require.NoError(t, err, string(out))
-	assert.Empty(t, out)
+		t.Log(`checking ` + fp)
 
-	bytes, err := ioutil.ReadFile(`types.go`)
+		expectedFile := strings.TrimSuffix(fp, ext) + `.expected`
+
+		expectedBytes, err := ioutil.ReadFile(expectedFile)
+		require.NoError(t, err)
+
+		actualBytes, err := ioutil.ReadFile(fp)
+		require.NoError(t, err)
+		assert.Equal(t, string(expectedBytes), string(actualBytes))
+
+		return nil
+	})
 	require.NoError(t, err)
-	assert.Equal(t, string(expectation), string(bytes))
 }
