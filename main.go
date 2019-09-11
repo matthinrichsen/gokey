@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/importer"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"go/types"
 	"io/ioutil"
@@ -12,7 +13,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/matthinrichsen/gokey/tests"
 	wat "github.com/matthinrichsen/gokey/tests"
 )
@@ -34,25 +34,31 @@ type brokenFile struct {
 }
 
 func fixDirectory(path string) {
-
 	path, err := filepath.Abs(path)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	toFix := []brokenFile{}
 	fileSet := token.NewFileSet()
 	packages := map[string]*types.Info{}
 
-	_ = filepath.Walk(path, func(filename string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(path, func(directory string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			return nil
 		}
-		log.Println(filename)
-		allFiles, err := parseAllGoFilesInDir(path, fileSet, false)
+
+		astinfo, allFiles, err := compile(directory, fileSet)
 		if err != nil {
 			return nil
 		}
 
+		importDir, err := filepath.Rel(filepath.Join(os.Getenv(`GOPATH`), `src`), directory)
+		if err != nil {
+			importDir = directory
+		}
+
+		packages[importDir] = astinfo
 		buildOutImports(allFiles, fileSet, packages)
 
 		for _, f := range allFiles {
@@ -82,8 +88,7 @@ func fixDirectory(path string) {
 			if len(nodesToRepair) > 0 {
 				toFix = append(toFix, brokenFile{
 					f:             f,
-					dir:           path,
-					filename:      filename,
+					dir:           importDir,
 					mode:          info.Mode(),
 					nodesToRepair: nodesToRepair,
 				})
@@ -98,85 +103,64 @@ func fixDirectory(path string) {
 			if i.Obj != nil {
 				ts, ok := i.Obj.Decl.(*ast.TypeSpec)
 				if ok {
-					structFieldNames[strings.TrimSuffix(strings.TrimPrefix(k, `"`), `"`)+"."+i.Name] = membersFromTypeSpec(ts)
+					structFieldNames[removeQuotes(k)+"."+i.Name] = membersFromTypeSpec(ts)
 				}
 			}
 		}
 	}
-	spew.Dump(structFieldNames)
 
 	for _, brokenFile := range toFix {
 		importsToPaths := map[string]string{}
 		for _, i := range brokenFile.f.Imports {
 			if i.Name != nil {
-				importsToPaths[i.Name.String()] = i.Path.Value
+				importsToPaths[removeQuotes(i.Name.String())] = removeQuotes(i.Path.Value)
 			}
-			importsToPaths[i.Path.Value] = i.Path.Value
+			_, value := filepath.Split(removeQuotes(i.Path.Value))
+			importsToPaths[value] = removeQuotes(i.Path.Value)
 		}
 
 		for _, n := range brokenFile.nodesToRepair {
-			names := []string{}
+			var structReference string
 			switch t := n.Type.(type) {
-			case *ast.SelectorExpr:
+			case *ast.SelectorExpr: // this struct declaration is import from another package
 				structName := t.Sel.String()
 
 				pkg, ok := t.X.(*ast.Ident)
 				if ok {
-					structName := removeQuotes(importsToPaths[removeQuotes(pkg.String())]) + "." + structName
-					log.Println(structName)
-					names = structFieldNames[structName]
+					renamedImport := importsToPaths[removeQuotes(pkg.String())]
+					structReference = renamedImport + `.` + structName
+				}
+			case *ast.Ident: // this struct declaration is local to the package
+				structReference = brokenFile.dir + `.` + t.Name
+			}
+
+			names := structFieldNames[structReference]
+			if len(names) != len(n.Elts) {
+				continue
+			}
+
+			for i, s := range n.Elts {
+				switch s.(type) {
+				case *ast.BasicLit:
+					n.Elts[i] = &ast.KeyValueExpr{
+						Value: s,
+						Key: &ast.Ident{
+							Name: names[i],
+						},
+					}
+				case *ast.CompositeLit:
+					n.Elts[i] = &ast.KeyValueExpr{
+						Value: s,
+						Key: &ast.Ident{
+							Name: names[i],
+						},
+					}
 				}
 			}
-			log.Println(names)
-			//spew.Dump(n)
-			_ = n
 		}
+		printer.Fprint(os.Stdout, fileSet, brokenFile.f)
+
 	}
-}
-
-// this should take in the package and struct name instead and either compute the struct field names
-// or return a cached copy of it
-func getMemberNames(dir string, a *ast.CompositeLit, infos map[string]*types.Info) []string {
-	switch t := a.Type.(type) {
-	case *ast.Ident:
-		for k, v := range infos {
-			_, foundIt := v.Defs[t]
-			if foundIt {
-				log.Println(`FOUND IT`, k, t)
-			}
-			for k, v := range v.Defs {
-				log.Println(k, v)
-			}
-		}
-	case *ast.SelectorExpr:
-		for k, v := range infos {
-			_, foundIt := v.Defs[t.Sel]
-			if foundIt {
-				log.Println(`FOUND IT SEL`, k, t)
-			}
-		}
-	}
-	return nil
-
-	id, ok := a.Type.(*ast.Ident)
-	if !ok || id == nil || id.Obj == nil {
-		sel, ok := a.Type.(*ast.SelectorExpr)
-		if ok {
-			log.Printf("sel")
-			log.Printf("%#v %#v", sel.X, sel.Sel)
-		} else {
-
-			log.Printf("not through %#v", a.Type)
-		}
-		return nil
-	}
-
-	ts, ok := id.Obj.Decl.(*ast.TypeSpec)
-	if !ok || ts == nil {
-		return nil
-	}
-
-	return membersFromTypeSpec(ts)
 }
 
 func membersFromTypeSpec(ts *ast.TypeSpec) []string {
@@ -212,9 +196,7 @@ func removeQuotes(s string) string {
 	return strings.TrimSuffix(strings.TrimPrefix(s, `"`), `"`)
 }
 
-func compile(importPath string, fset *token.FileSet) (*types.Info, []*ast.File, error) {
-	p := filepath.Join(os.Getenv("GOPATH"), "src", strings.TrimSuffix(strings.TrimPrefix(importPath, `"`), `"`))
-
+func compile(p string, fset *token.FileSet) (*types.Info, []*ast.File, error) {
 	files, err := parseAllGoFilesInDir(p, fset, false)
 	if err != nil {
 		return nil, nil, err
@@ -231,11 +213,10 @@ func compile(importPath string, fset *token.FileSet) (*types.Info, []*ast.File, 
 		Selections: make(map[*ast.SelectorExpr]*types.Selection),
 	}
 
-	pkgs, err := tc.Check(importPath, fset, files, info)
+	_, err = tc.Check(p, fset, files, info)
 	if err != nil {
 		return nil, nil, err
 	}
-	_ = pkgs
 	return info, files, nil
 }
 
@@ -247,7 +228,7 @@ func buildOutImports(files []*ast.File, fileSet *token.FileSet, packages map[str
 				continue
 			}
 
-			info, nextRoundOfFiles, err := compile(i.Path.Value, fileSet)
+			info, nextRoundOfFiles, err := compile(filepath.Join(os.Getenv("GOPATH"), "src", removeQuotes(i.Path.Value)), fileSet)
 			if err == nil {
 				packages[i.Path.Value] = info
 				buildOutImports(nextRoundOfFiles, fileSet, packages)
