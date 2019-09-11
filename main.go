@@ -61,7 +61,7 @@ func fixDirectory(path string) {
 		packages[importDir] = astinfo
 		buildOutImports(allFiles, fileSet, packages)
 
-		for _, f := range allFiles {
+		for filename, f := range allFiles {
 			nodesToRepair := []*ast.CompositeLit{}
 			ast.Inspect(f, func(n ast.Node) bool {
 				a, ok := n.(*ast.CompositeLit)
@@ -88,6 +88,7 @@ func fixDirectory(path string) {
 			if len(nodesToRepair) > 0 {
 				toFix = append(toFix, brokenFile{
 					f:             f,
+					filename:      filename,
 					dir:           importDir,
 					mode:          info.Mode(),
 					nodesToRepair: nodesToRepair,
@@ -158,7 +159,14 @@ func fixDirectory(path string) {
 				}
 			}
 		}
-		printer.Fprint(os.Stdout, fileSet, brokenFile.f)
+
+		fp, err := os.OpenFile(brokenFile.filename, os.O_WRONLY, brokenFile.mode)
+		if err != nil {
+			continue
+		}
+		defer fp.Close()
+		printer.Fprint(fp, fileSet, brokenFile.f)
+		fp.Close()
 
 	}
 }
@@ -196,7 +204,7 @@ func removeQuotes(s string) string {
 	return strings.TrimSuffix(strings.TrimPrefix(s, `"`), `"`)
 }
 
-func compile(p string, fset *token.FileSet) (*types.Info, []*ast.File, error) {
+func compile(p string, fset *token.FileSet) (*types.Info, map[string]*ast.File, error) {
 	files, err := parseAllGoFilesInDir(p, fset, false)
 	if err != nil {
 		return nil, nil, err
@@ -213,14 +221,19 @@ func compile(p string, fset *token.FileSet) (*types.Info, []*ast.File, error) {
 		Selections: make(map[*ast.SelectorExpr]*types.Selection),
 	}
 
-	_, err = tc.Check(p, fset, files, info)
+	fileList := []*ast.File{}
+	for _, f := range files {
+		fileList = append(fileList, f)
+	}
+
+	_, err = tc.Check(p, fset, fileList, info)
 	if err != nil {
 		return nil, nil, err
 	}
 	return info, files, nil
 }
 
-func buildOutImports(files []*ast.File, fileSet *token.FileSet, packages map[string]*types.Info) {
+func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, packages map[string]*types.Info) {
 	for _, f := range files {
 		for _, i := range f.Imports {
 			_, ok := packages[i.Path.Value]
@@ -237,8 +250,8 @@ func buildOutImports(files []*ast.File, fileSet *token.FileSet, packages map[str
 	}
 }
 
-func parseAllGoFilesInDir(dir string, fset *token.FileSet, recurse bool) ([]*ast.File, error) {
-	files := []*ast.File{}
+func parseAllGoFilesInDir(dir string, fset *token.FileSet, recurse bool) (map[string]*ast.File, error) {
+	files := map[string]*ast.File{}
 	_ = filepath.Walk(dir, func(filename string, info os.FileInfo, err error) error {
 		if info == nil {
 			return nil
@@ -267,7 +280,7 @@ func parseAllGoFilesInDir(dir string, fset *token.FileSet, recurse bool) ([]*ast
 			return nil
 		}
 
-		files = append(files, f)
+		files[filename] = f
 		return nil
 	})
 
