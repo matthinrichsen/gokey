@@ -157,7 +157,6 @@ func fixDirectory(path string) {
 			formatted = b.Bytes()
 		}
 		ioutil.WriteFile(brokenFile.filename, formatted, brokenFile.mode)
-
 	}
 }
 
@@ -195,10 +194,11 @@ func removeQuotes(s string) string {
 }
 
 func compile(p string, fset *token.FileSet) (*types.Info, map[string]*ast.File, error) {
-	files, err := parseAllGoFilesInDir(p, fset, false)
+	files, err := parseAllGoFilesInDir(p, fset)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	tc := &types.Config{
 		Importer: importer.Default(),
 	}
@@ -240,14 +240,14 @@ func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, package
 	}
 }
 
-func parseAllGoFilesInDir(dir string, fset *token.FileSet, recurse bool) (map[string]*ast.File, error) {
+func parseAllGoFilesInDir(dir string, fset *token.FileSet) (map[string]*ast.File, error) {
 	files := map[string]*ast.File{}
 	_ = filepath.Walk(dir, func(filename string, info os.FileInfo, err error) error {
 		if info == nil {
 			return nil
 		}
 		if info.IsDir() {
-			if !recurse && dir != filename {
+			if dir != filename {
 				return filepath.SkipDir
 			}
 			return nil
