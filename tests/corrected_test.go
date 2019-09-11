@@ -18,16 +18,16 @@ import (
 )
 
 func lookAtMyTerribleFunction() {
-	s := MyStruct{a: 1, b: 2, c: 3, m: map[string]string{}, arr: []int{}, MyStruct2: MyStruct2{AnotherStruct: MyStruct3{errors.New("implements Error()")}}}
+	s := MyStruct{a: 1, b: 2, c: 3, m: map[string]string{}, arr: []int{}, MyStruct2: MyStruct2{AnotherStruct: MyStruct3{errors.New("implements Error()")}}, LastStruct: anotherPackage.LastStruct{}}
 	log.Println(s)
 }
 `
 
 	out, err := exec.Command(`gokey`).CombinedOutput()
-	require.NoError(t, err)
+	require.NoError(t, err, string(out))
 	assert.Empty(t, out)
 
 	bytes, err := ioutil.ReadFile(`bad_function.go`)
-	require.NoError(t, err, string(bytes))
+	require.NoError(t, err)
 	assert.Equal(t, expectation, string(bytes))
 }

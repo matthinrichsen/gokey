@@ -1,0 +1,933 @@
+(*ast.File)(0xc00001e580)({
+ Doc: (*ast.CommentGroup)(<nil>),
+ Package: (token.Pos) 1501,
+ Name: (*ast.Ident)(0xc0000059c0)(anotherPackage),
+ Decls: ([]ast.Decl) (len=1 cap=1) {
+  (*ast.GenDecl)(0xc000057040)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 1527,
+   Tok: (token.Token) type,
+   Lparen: (token.Pos) 0,
+   Specs: ([]ast.Spec) (len=1 cap=1) {
+    (*ast.TypeSpec)(0xc000078cf0)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(0xc0000059e0)(LastStruct),
+     Assign: (token.Pos) 0,
+     Type: (*ast.StructType)(0xc000005a40)({
+      Struct: (token.Pos) 1543,
+      Fields: (*ast.FieldList)(0xc000078d20)({
+       Opening: (token.Pos) 1550,
+       List: ([]*ast.Field) (len=1 cap=1) {
+        (*ast.Field)(0xc000057000)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc000005a00)(Int)
+         },
+         Type: (*ast.Ident)(0xc000005a20)(int),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        })
+       },
+       Closing: (token.Pos) 1563
+      }),
+      Incomplete: (bool) false
+     }),
+     Comment: (*ast.CommentGroup)(<nil>)
+    })
+   },
+   Rparen: (token.Pos) 0
+  })
+ },
+ Scope: (*ast.Scope)(0xc000054790)(scope 0xc000054790 {
+	type LastStruct
+}
+),
+ Imports: ([]*ast.ImportSpec) <nil>,
+ Unresolved: ([]*ast.Ident) (len=1 cap=1) {
+  (*ast.Ident)(0xc000005a20)(int)
+ },
+ Comments: ([]*ast.CommentGroup) <nil>
+})
+(*ast.File)(0xc00001e700)({
+ Doc: (*ast.CommentGroup)(<nil>),
+ Package: (token.Pos) 1567,
+ Name: (*ast.Ident)(0xc000005b80)(tests),
+ Decls: ([]ast.Decl) (len=2 cap=2) {
+  (*ast.GenDecl)(0xc000057240)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 1582,
+   Tok: (token.Token) import,
+   Lparen: (token.Pos) 1589,
+   Specs: ([]ast.Spec) (len=3 cap=4) {
+    (*ast.ImportSpec)(0xc000078e70)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc000005ba0)({
+      ValuePos: (token.Pos) 1592,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=8) "\"errors\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    }),
+    (*ast.ImportSpec)(0xc000078ea0)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc000005bc0)({
+      ValuePos: (token.Pos) 1602,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=5) "\"log\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    }),
+    (*ast.ImportSpec)(0xc000078ed0)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc000005c00)({
+      ValuePos: (token.Pos) 1610,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=54) "\"github.com/matthinrichsen/gokey/tests/anotherPackage\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    })
+   },
+   Rparen: (token.Pos) 1665
+  }),
+  (*ast.FuncDecl)(0xc000079020)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Recv: (*ast.FieldList)(<nil>),
+   Name: (*ast.Ident)(0xc000005c40)(lookAtMyTerribleFunction),
+   Type: (*ast.FuncType)(0xc0000e80a0)({
+    Func: (token.Pos) 1668,
+    Params: (*ast.FieldList)(0xc000078f30)({
+     Opening: (token.Pos) 1697,
+     List: ([]*ast.Field) <nil>,
+     Closing: (token.Pos) 1698
+    }),
+    Results: (*ast.FieldList)(<nil>)
+   }),
+   Body: (*ast.BlockStmt)(0xc000078ff0)({
+    Lbrace: (token.Pos) 1700,
+    List: ([]ast.Stmt) (len=3 cap=4) {
+     (*ast.AssignStmt)(0xc0000572c0)({
+      Lhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.Ident)(0xc000005c80)(a)
+      },
+      TokPos: (token.Pos) 1705,
+      Tok: (token.Token) :=,
+      Rhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.CompositeLit)(0xc000057280)({
+        Type: (*ast.SelectorExpr)(0xc000005ce0)({
+         X: (*ast.Ident)(0xc000005ca0)(anotherPackage),
+         Sel: (*ast.Ident)(0xc000005cc0)(LastStruct)
+        }),
+        Lbrace: (token.Pos) 1733,
+        Elts: ([]ast.Expr) (len=1 cap=1) {
+         (*ast.BasicLit)(0xc000005d00)({
+          ValuePos: (token.Pos) 1734,
+          Kind: (token.Token) INT,
+          Value: (string) (len=1) "2"
+         })
+        },
+        Rbrace: (token.Pos) 1735,
+        Incomplete: (bool) false
+       })
+      }
+     }),
+     (*ast.AssignStmt)(0xc000057540)({
+      Lhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.Ident)(0xc000005d20)(s)
+      },
+      TokPos: (token.Pos) 1740,
+      Tok: (token.Token) :=,
+      Rhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.CompositeLit)(0xc000057500)({
+        Type: (*ast.Ident)(0xc000005d40)(MyStruct),
+        Lbrace: (token.Pos) 1751,
+        Elts: ([]ast.Expr) (len=8 cap=8) {
+         (*ast.BasicLit)(0xc000005d60)({
+          ValuePos: (token.Pos) 1752,
+          Kind: (token.Token) INT,
+          Value: (string) (len=1) "1"
+         }),
+         (*ast.BasicLit)(0xc000005d80)({
+          ValuePos: (token.Pos) 1755,
+          Kind: (token.Token) INT,
+          Value: (string) (len=1) "2"
+         }),
+         (*ast.BasicLit)(0xc000005dc0)({
+          ValuePos: (token.Pos) 1758,
+          Kind: (token.Token) INT,
+          Value: (string) (len=1) "3"
+         }),
+         (*ast.CompositeLit)(0xc000057340)({
+          Type: (*ast.MapType)(0xc000078f90)({
+           Map: (token.Pos) 1761,
+           Key: (*ast.Ident)(0xc000005de0)(string),
+           Value: (*ast.Ident)(0xc000005e20)(string)
+          }),
+          Lbrace: (token.Pos) 1778,
+          Elts: ([]ast.Expr) <nil>,
+          Rbrace: (token.Pos) 1779,
+          Incomplete: (bool) false
+         }),
+         (*ast.CompositeLit)(0xc0000573c0)({
+          Type: (*ast.ArrayType)(0xc000078fc0)({
+           Lbrack: (token.Pos) 1782,
+           Len: (ast.Expr) <nil>,
+           Elt: (*ast.Ident)(0xc000005e40)(int)
+          }),
+          Lbrace: (token.Pos) 1787,
+          Elts: ([]ast.Expr) <nil>,
+          Rbrace: (token.Pos) 1788,
+          Incomplete: (bool) false
+         }),
+         (*ast.CompositeLit)(0xc000057480)({
+          Type: (*ast.Ident)(0xc000005e60)(MyStruct2),
+          Lbrace: (token.Pos) 1800,
+          Elts: ([]ast.Expr) (len=1 cap=1) {
+           (*ast.CompositeLit)(0xc000057440)({
+            Type: (*ast.Ident)(0xc000005e80)(MyStruct3),
+            Lbrace: (token.Pos) 1810,
+            Elts: ([]ast.Expr) (len=1 cap=1) {
+             (*ast.CallExpr)(0xc000057400)({
+              Fun: (*ast.SelectorExpr)(0xc000005ee0)({
+               X: (*ast.Ident)(0xc000005ea0)(errors),
+               Sel: (*ast.Ident)(0xc000005ec0)(New)
+              }),
+              Lparen: (token.Pos) 1821,
+              Args: ([]ast.Expr) (len=1 cap=1) {
+               (*ast.BasicLit)(0xc000005f00)({
+                ValuePos: (token.Pos) 1822,
+                Kind: (token.Token) STRING,
+                Value: (string) (len=20) "`implements Error()`"
+               })
+              },
+              Ellipsis: (token.Pos) 0,
+              Rparen: (token.Pos) 1842
+             })
+            },
+            Rbrace: (token.Pos) 1843,
+            Incomplete: (bool) false
+           })
+          },
+          Rbrace: (token.Pos) 1844,
+          Incomplete: (bool) false
+         }),
+         (*ast.CompositeLit)(0xc0000574c0)({
+          Type: (*ast.SelectorExpr)(0xc000005f60)({
+           X: (*ast.Ident)(0xc000005f20)(anotherPackage),
+           Sel: (*ast.Ident)(0xc000005f40)(LastStruct)
+          }),
+          Lbrace: (token.Pos) 1872,
+          Elts: ([]ast.Expr) (len=1 cap=1) {
+           (*ast.BasicLit)(0xc000005f80)({
+            ValuePos: (token.Pos) 1873,
+            Kind: (token.Token) INT,
+            Value: (string) (len=1) "1"
+           })
+          },
+          Rbrace: (token.Pos) 1874,
+          Incomplete: (bool) false
+         }),
+         (*ast.Ident)(0xc000005fa0)(a)
+        },
+        Rbrace: (token.Pos) 1878,
+        Incomplete: (bool) false
+       })
+      }
+     }),
+     (*ast.ExprStmt)(0xc0000549c0)({
+      X: (*ast.CallExpr)(0xc000057580)({
+       Fun: (*ast.SelectorExpr)(0xc0000e8020)({
+        X: (*ast.Ident)(0xc000005fe0)(log),
+        Sel: (*ast.Ident)(0xc0000e8000)(Println)
+       }),
+       Lparen: (token.Pos) 1892,
+       Args: ([]ast.Expr) (len=2 cap=2) {
+        (*ast.Ident)(0xc0000e8040)(s),
+        (*ast.Ident)(0xc0000e8060)(a)
+       },
+       Ellipsis: (token.Pos) 0,
+       Rparen: (token.Pos) 1897
+      })
+     })
+    },
+    Rbrace: (token.Pos) 1899
+   })
+  })
+ },
+ Scope: (*ast.Scope)(0xc000054880)(scope 0xc000054880 {
+	func lookAtMyTerribleFunction
+}
+),
+ Imports: ([]*ast.ImportSpec) (len=3 cap=4) {
+  (*ast.ImportSpec)(0xc000078e70)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc000005ba0)({
+    ValuePos: (token.Pos) 1592,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=8) "\"errors\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  }),
+  (*ast.ImportSpec)(0xc000078ea0)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc000005bc0)({
+    ValuePos: (token.Pos) 1602,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=5) "\"log\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  }),
+  (*ast.ImportSpec)(0xc000078ed0)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc000005c00)({
+    ValuePos: (token.Pos) 1610,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=54) "\"github.com/matthinrichsen/gokey/tests/anotherPackage\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  })
+ },
+ Unresolved: ([]*ast.Ident) (len=10 cap=16) {
+  (*ast.Ident)(0xc000005ca0)(anotherPackage),
+  (*ast.Ident)(0xc000005d40)(MyStruct),
+  (*ast.Ident)(0xc000005de0)(string),
+  (*ast.Ident)(0xc000005e20)(string),
+  (*ast.Ident)(0xc000005e40)(int),
+  (*ast.Ident)(0xc000005e60)(MyStruct2),
+  (*ast.Ident)(0xc000005e80)(MyStruct3),
+  (*ast.Ident)(0xc000005ea0)(errors),
+  (*ast.Ident)(0xc000005f20)(anotherPackage),
+  (*ast.Ident)(0xc000005fe0)(log)
+ },
+ Comments: ([]*ast.CommentGroup) <nil>
+})
+(*ast.File)(0xc00001e900)({
+ Doc: (*ast.CommentGroup)(<nil>),
+ Package: (token.Pos) 1902,
+ Name: (*ast.Ident)(0xc0000e81e0)(tests),
+ Decls: ([]ast.Decl) (len=2 cap=2) {
+  (*ast.GenDecl)(0xc000057700)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 1919,
+   Tok: (token.Token) import,
+   Lparen: (token.Pos) 1926,
+   Specs: ([]ast.Spec) (len=5 cap=8) {
+    (*ast.ImportSpec)(0xc0000790e0)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc0000e8200)({
+      ValuePos: (token.Pos) 1930,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=11) "\"io/ioutil\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    }),
+    (*ast.ImportSpec)(0xc000079110)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc0000e8220)({
+      ValuePos: (token.Pos) 1944,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=9) "\"os/exec\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    }),
+    (*ast.ImportSpec)(0xc000079140)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc0000e8260)({
+      ValuePos: (token.Pos) 1956,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=9) "\"testing\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    }),
+    (*ast.ImportSpec)(0xc000079170)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc0000e82a0)({
+      ValuePos: (token.Pos) 1970,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=36) "\"github.com/stretchr/testify/assert\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    }),
+    (*ast.ImportSpec)(0xc0000791a0)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc0000e82c0)({
+      ValuePos: (token.Pos) 2009,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=37) "\"github.com/stretchr/testify/require\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    })
+   },
+   Rparen: (token.Pos) 2048
+  }),
+  (*ast.FuncDecl)(0xc000079290)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Recv: (*ast.FieldList)(<nil>),
+   Name: (*ast.Ident)(0xc0000e82e0)(TestCorrection),
+   Type: (*ast.FuncType)(0xc0000e89c0)({
+    Func: (token.Pos) 2053,
+    Params: (*ast.FieldList)(0xc000079200)({
+     Opening: (token.Pos) 2072,
+     List: ([]*ast.Field) (len=1 cap=1) {
+      (*ast.Field)(0xc000057740)({
+       Doc: (*ast.CommentGroup)(<nil>),
+       Names: ([]*ast.Ident) (len=1 cap=1) {
+        (*ast.Ident)(0xc0000e8300)(t)
+       },
+       Type: (*ast.StarExpr)(0xc0000e8380)({
+        Star: (token.Pos) 2075,
+        X: (*ast.SelectorExpr)(0xc0000e8360)({
+         X: (*ast.Ident)(0xc0000e8320)(testing),
+         Sel: (*ast.Ident)(0xc0000e8340)(T)
+        })
+       }),
+       Tag: (*ast.BasicLit)(<nil>),
+       Comment: (*ast.CommentGroup)(<nil>)
+      })
+     },
+     Closing: (token.Pos) 2085
+    }),
+    Results: (*ast.FieldList)(<nil>)
+   }),
+   Body: (*ast.BlockStmt)(0xc000079260)({
+    Lbrace: (token.Pos) 2087,
+    List: ([]ast.Stmt) (len=7 cap=8) {
+     (*ast.AssignStmt)(0xc000057780)({
+      Lhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.Ident)(0xc0000e83c0)(expectation)
+      },
+      TokPos: (token.Pos) 2103,
+      Tok: (token.Token) :=,
+      Rhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.BasicLit)(0xc0000e83e0)({
+        ValuePos: (token.Pos) 2106,
+        Kind: (token.Token) STRING,
+        Value: (string) (len=292) "`package tests\n\nimport (\n\t\"errors\"\n\t\"log\"\n)\n\nfunc lookAtMyTerribleFunction() {\n\ts := MyStruct{a: 1, b: 2, c: 3, m: map[string]string{}, arr: []int{}, MyStruct2: MyStruct2{AnotherStruct: MyStruct3{errors.New(\"implements Error()\")}}, LastStruct: anotherPackage.LastStruct{}}\n\tlog.Println(s)\n}\n`"
+       })
+      }
+     }),
+     (*ast.AssignStmt)(0xc000057840)({
+      Lhs: ([]ast.Expr) (len=2 cap=2) {
+       (*ast.Ident)(0xc0000e8400)(out),
+       (*ast.Ident)(0xc0000e8420)(err)
+      },
+      TokPos: (token.Pos) 2423,
+      Tok: (token.Token) :=,
+      Rhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.CallExpr)(0xc000057800)({
+        Fun: (*ast.SelectorExpr)(0xc0000e8500)({
+         X: (*ast.CallExpr)(0xc0000577c0)({
+          Fun: (*ast.SelectorExpr)(0xc0000e84a0)({
+           X: (*ast.Ident)(0xc0000e8460)(exec),
+           Sel: (*ast.Ident)(0xc0000e8480)(Command)
+          }),
+          Lparen: (token.Pos) 2438,
+          Args: ([]ast.Expr) (len=1 cap=1) {
+           (*ast.BasicLit)(0xc0000e84c0)({
+            ValuePos: (token.Pos) 2439,
+            Kind: (token.Token) STRING,
+            Value: (string) (len=7) "`gokey`"
+           })
+          },
+          Ellipsis: (token.Pos) 0,
+          Rparen: (token.Pos) 2446
+         }),
+         Sel: (*ast.Ident)(0xc0000e84e0)(CombinedOutput)
+        }),
+        Lparen: (token.Pos) 2462,
+        Args: ([]ast.Expr) <nil>,
+        Ellipsis: (token.Pos) 0,
+        Rparen: (token.Pos) 2463
+       })
+      }
+     }),
+     (*ast.ExprStmt)(0xc000054b80)({
+      X: (*ast.CallExpr)(0xc000057900)({
+       Fun: (*ast.SelectorExpr)(0xc0000e85a0)({
+        X: (*ast.Ident)(0xc0000e8540)(require),
+        Sel: (*ast.Ident)(0xc0000e8580)(NoError)
+       }),
+       Lparen: (token.Pos) 2482,
+       Args: ([]ast.Expr) (len=3 cap=4) {
+        (*ast.Ident)(0xc0000e85c0)(t),
+        (*ast.Ident)(0xc0000e85e0)(err),
+        (*ast.CallExpr)(0xc000057880)({
+         Fun: (*ast.Ident)(0xc0000e8620)(string),
+         Lparen: (token.Pos) 2497,
+         Args: ([]ast.Expr) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8640)(out)
+         },
+         Ellipsis: (token.Pos) 0,
+         Rparen: (token.Pos) 2501
+        })
+       },
+       Ellipsis: (token.Pos) 0,
+       Rparen: (token.Pos) 2502
+      })
+     }),
+     (*ast.ExprStmt)(0xc000054bb0)({
+      X: (*ast.CallExpr)(0xc0000579c0)({
+       Fun: (*ast.SelectorExpr)(0xc0000e86a0)({
+        X: (*ast.Ident)(0xc0000e8660)(assert),
+        Sel: (*ast.Ident)(0xc0000e8680)(Empty)
+       }),
+       Lparen: (token.Pos) 2518,
+       Args: ([]ast.Expr) (len=2 cap=2) {
+        (*ast.Ident)(0xc0000e86c0)(t),
+        (*ast.Ident)(0xc0000e86e0)(out)
+       },
+       Ellipsis: (token.Pos) 0,
+       Rparen: (token.Pos) 2525
+      })
+     }),
+     (*ast.AssignStmt)(0xc000057a40)({
+      Lhs: ([]ast.Expr) (len=2 cap=2) {
+       (*ast.Ident)(0xc0000e8720)(bytes),
+       (*ast.Ident)(0xc0000e8740)(err)
+      },
+      TokPos: (token.Pos) 2542,
+      Tok: (token.Token) :=,
+      Rhs: ([]ast.Expr) (len=1 cap=1) {
+       (*ast.CallExpr)(0xc000057a00)({
+        Fun: (*ast.SelectorExpr)(0xc0000e87c0)({
+         X: (*ast.Ident)(0xc0000e8780)(ioutil),
+         Sel: (*ast.Ident)(0xc0000e87a0)(ReadFile)
+        }),
+        Lparen: (token.Pos) 2560,
+        Args: ([]ast.Expr) (len=1 cap=1) {
+         (*ast.BasicLit)(0xc0000e87e0)({
+          ValuePos: (token.Pos) 2561,
+          Kind: (token.Token) STRING,
+          Value: (string) (len=17) "`bad_function.go`"
+         })
+        },
+        Ellipsis: (token.Pos) 0,
+        Rparen: (token.Pos) 2578
+       })
+      }
+     }),
+     (*ast.ExprStmt)(0xc000054c10)({
+      X: (*ast.CallExpr)(0xc000057a80)({
+       Fun: (*ast.SelectorExpr)(0xc0000e8840)({
+        X: (*ast.Ident)(0xc0000e8800)(require),
+        Sel: (*ast.Ident)(0xc0000e8820)(NoError)
+       }),
+       Lparen: (token.Pos) 2597,
+       Args: ([]ast.Expr) (len=2 cap=2) {
+        (*ast.Ident)(0xc0000e8860)(t),
+        (*ast.Ident)(0xc0000e8880)(err)
+       },
+       Ellipsis: (token.Pos) 0,
+       Rparen: (token.Pos) 2604
+      })
+     }),
+     (*ast.ExprStmt)(0xc000054c50)({
+      X: (*ast.CallExpr)(0xc000057b40)({
+       Fun: (*ast.SelectorExpr)(0xc0000e8900)({
+        X: (*ast.Ident)(0xc0000e88c0)(assert),
+        Sel: (*ast.Ident)(0xc0000e88e0)(Equal)
+       }),
+       Lparen: (token.Pos) 2620,
+       Args: ([]ast.Expr) (len=3 cap=4) {
+        (*ast.Ident)(0xc0000e8920)(t),
+        (*ast.Ident)(0xc0000e8940)(expectation),
+        (*ast.CallExpr)(0xc000057ac0)({
+         Fun: (*ast.Ident)(0xc0000e8980)(string),
+         Lparen: (token.Pos) 2643,
+         Args: ([]ast.Expr) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e89a0)(bytes)
+         },
+         Ellipsis: (token.Pos) 0,
+         Rparen: (token.Pos) 2649
+        })
+       },
+       Ellipsis: (token.Pos) 0,
+       Rparen: (token.Pos) 2650
+      })
+     })
+    },
+    Rbrace: (token.Pos) 2653
+   })
+  })
+ },
+ Scope: (*ast.Scope)(0xc000054a70)(scope 0xc000054a70 {
+	func TestCorrection
+}
+),
+ Imports: ([]*ast.ImportSpec) (len=5 cap=8) {
+  (*ast.ImportSpec)(0xc0000790e0)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc0000e8200)({
+    ValuePos: (token.Pos) 1930,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=11) "\"io/ioutil\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  }),
+  (*ast.ImportSpec)(0xc000079110)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc0000e8220)({
+    ValuePos: (token.Pos) 1944,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=9) "\"os/exec\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  }),
+  (*ast.ImportSpec)(0xc000079140)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc0000e8260)({
+    ValuePos: (token.Pos) 1956,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=9) "\"testing\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  }),
+  (*ast.ImportSpec)(0xc000079170)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc0000e82a0)({
+    ValuePos: (token.Pos) 1970,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=36) "\"github.com/stretchr/testify/assert\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  }),
+  (*ast.ImportSpec)(0xc0000791a0)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc0000e82c0)({
+    ValuePos: (token.Pos) 2009,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=37) "\"github.com/stretchr/testify/require\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  })
+ },
+ Unresolved: ([]*ast.Ident) (len=9 cap=16) {
+  (*ast.Ident)(0xc0000e8320)(testing),
+  (*ast.Ident)(0xc0000e8460)(exec),
+  (*ast.Ident)(0xc0000e8540)(require),
+  (*ast.Ident)(0xc0000e8620)(string),
+  (*ast.Ident)(0xc0000e8660)(assert),
+  (*ast.Ident)(0xc0000e8780)(ioutil),
+  (*ast.Ident)(0xc0000e8800)(require),
+  (*ast.Ident)(0xc0000e88c0)(assert),
+  (*ast.Ident)(0xc0000e8980)(string)
+ },
+ Comments: ([]*ast.CommentGroup) <nil>
+})
+(*ast.File)(0xc00001ea80)({
+ Doc: (*ast.CommentGroup)(<nil>),
+ Package: (token.Pos) 2657,
+ Name: (*ast.Ident)(0xc0000e8ac0)(tests),
+ Decls: ([]ast.Decl) (len=5 cap=8) {
+  (*ast.GenDecl)(0xc000057b80)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 2674,
+   Tok: (token.Token) import,
+   Lparen: (token.Pos) 2681,
+   Specs: ([]ast.Spec) (len=1 cap=1) {
+    (*ast.ImportSpec)(0xc000079320)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(<nil>),
+     Path: (*ast.BasicLit)(0xc0000e8ae0)({
+      ValuePos: (token.Pos) 2685,
+      Kind: (token.Token) STRING,
+      Value: (string) (len=54) "\"github.com/matthinrichsen/gokey/tests/anotherPackage\""
+     }),
+     Comment: (*ast.CommentGroup)(<nil>),
+     EndPos: (token.Pos) 0
+    })
+   },
+   Rparen: (token.Pos) 2741
+  }),
+  (*ast.GenDecl)(0xc000057c40)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 2746,
+   Tok: (token.Token) type,
+   Lparen: (token.Pos) 0,
+   Specs: ([]ast.Spec) (len=1 cap=1) {
+    (*ast.TypeSpec)(0xc000079350)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(0xc0000e8b00)(someInterface),
+     Assign: (token.Pos) 0,
+     Type: (*ast.InterfaceType)(0xc0000e8b80)({
+      Interface: (token.Pos) 2765,
+      Methods: (*ast.FieldList)(0xc0000793e0)({
+       Opening: (token.Pos) 2775,
+       List: ([]*ast.Field) (len=1 cap=1) {
+        (*ast.Field)(0xc000057c00)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8b20)(Error)
+         },
+         Type: (*ast.FuncType)(0xc0000e8b60)({
+          Func: (token.Pos) 0,
+          Params: (*ast.FieldList)(0xc000079380)({
+           Opening: (token.Pos) 2784,
+           List: ([]*ast.Field) <nil>,
+           Closing: (token.Pos) 2785
+          }),
+          Results: (*ast.FieldList)(0xc0000793b0)({
+           Opening: (token.Pos) 0,
+           List: ([]*ast.Field) (len=1 cap=1) {
+            (*ast.Field)(0xc000057bc0)({
+             Doc: (*ast.CommentGroup)(<nil>),
+             Names: ([]*ast.Ident) <nil>,
+             Type: (*ast.Ident)(0xc0000e8b40)(string),
+             Tag: (*ast.BasicLit)(<nil>),
+             Comment: (*ast.CommentGroup)(<nil>)
+            })
+           },
+           Closing: (token.Pos) 0
+          })
+         }),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        })
+       },
+       Closing: (token.Pos) 2795
+      }),
+      Incomplete: (bool) false
+     }),
+     Comment: (*ast.CommentGroup)(<nil>)
+    })
+   },
+   Rparen: (token.Pos) 0
+  }),
+  (*ast.GenDecl)(0xc000057f00)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 2800,
+   Tok: (token.Token) type,
+   Lparen: (token.Pos) 0,
+   Specs: ([]ast.Spec) (len=1 cap=1) {
+    (*ast.TypeSpec)(0xc000079410)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(0xc0000e8bc0)(MyStruct),
+     Assign: (token.Pos) 0,
+     Type: (*ast.StructType)(0xc0000e8e80)({
+      Struct: (token.Pos) 2814,
+      Fields: (*ast.FieldList)(0xc0000794a0)({
+       Opening: (token.Pos) 2821,
+       List: ([]*ast.Field) (len=8 cap=8) {
+        (*ast.Field)(0xc000057c80)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8be0)(a)
+         },
+         Type: (*ast.Ident)(0xc0000e8c00)(int),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        }),
+        (*ast.Field)(0xc000057cc0)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8c20)(b)
+         },
+         Type: (*ast.Ident)(0xc0000e8c40)(int),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        }),
+        (*ast.Field)(0xc000057d00)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8c80)(c)
+         },
+         Type: (*ast.Ident)(0xc0000e8ca0)(int),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        }),
+        (*ast.Field)(0xc000057d80)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8ce0)(m)
+         },
+         Type: (*ast.MapType)(0xc000079440)({
+          Map: (token.Pos) 2855,
+          Key: (*ast.Ident)(0xc0000e8d00)(string),
+          Value: (*ast.Ident)(0xc0000e8d20)(string)
+         }),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        }),
+        (*ast.Field)(0xc000057dc0)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8d40)(arr)
+         },
+         Type: (*ast.ArrayType)(0xc000079470)({
+          Lbrack: (token.Pos) 2879,
+          Len: (ast.Expr) <nil>,
+          Elt: (*ast.Ident)(0xc0000e8d60)(int)
+         }),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        }),
+        (*ast.Field)(0xc000057e40)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) <nil>,
+         Type: (*ast.Ident)(0xc0000e8d80)(MyStruct2),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        }),
+        (*ast.Field)(0xc000057e80)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) <nil>,
+         Type: (*ast.SelectorExpr)(0xc0000e8de0)({
+          X: (*ast.Ident)(0xc0000e8da0)(anotherPackage),
+          Sel: (*ast.Ident)(0xc0000e8dc0)(LastStruct)
+         }),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        }),
+        (*ast.Field)(0xc000057ec0)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8e00)(LS)
+         },
+         Type: (*ast.SelectorExpr)(0xc0000e8e60)({
+          X: (*ast.Ident)(0xc0000e8e20)(anotherPackage),
+          Sel: (*ast.Ident)(0xc0000e8e40)(LastStruct)
+         }),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        })
+       },
+       Closing: (token.Pos) 2961
+      }),
+      Incomplete: (bool) false
+     }),
+     Comment: (*ast.CommentGroup)(<nil>)
+    })
+   },
+   Rparen: (token.Pos) 0
+  }),
+  (*ast.GenDecl)(0xc000057fc0)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 2966,
+   Tok: (token.Token) type,
+   Lparen: (token.Pos) 0,
+   Specs: ([]ast.Spec) (len=1 cap=1) {
+    (*ast.TypeSpec)(0xc0000794d0)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(0xc0000e8ea0)(MyStruct2),
+     Assign: (token.Pos) 0,
+     Type: (*ast.StructType)(0xc0000e8f00)({
+      Struct: (token.Pos) 2981,
+      Fields: (*ast.FieldList)(0xc000079500)({
+       Opening: (token.Pos) 2988,
+       List: ([]*ast.Field) (len=1 cap=1) {
+        (*ast.Field)(0xc000057f80)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) (len=1 cap=1) {
+          (*ast.Ident)(0xc0000e8ec0)(AnotherStruct)
+         },
+         Type: (*ast.Ident)(0xc0000e8ee0)(MyStruct3),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        })
+       },
+       Closing: (token.Pos) 3017
+      }),
+      Incomplete: (bool) false
+     }),
+     Comment: (*ast.CommentGroup)(<nil>)
+    })
+   },
+   Rparen: (token.Pos) 0
+  }),
+  (*ast.GenDecl)(0xc0000f6040)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   TokPos: (token.Pos) 3022,
+   Tok: (token.Token) type,
+   Lparen: (token.Pos) 0,
+   Specs: ([]ast.Spec) (len=1 cap=1) {
+    (*ast.TypeSpec)(0xc000079530)({
+     Doc: (*ast.CommentGroup)(<nil>),
+     Name: (*ast.Ident)(0xc0000e8f20)(MyStruct3),
+     Assign: (token.Pos) 0,
+     Type: (*ast.StructType)(0xc0000e8f60)({
+      Struct: (token.Pos) 3037,
+      Fields: (*ast.FieldList)(0xc000079560)({
+       Opening: (token.Pos) 3044,
+       List: ([]*ast.Field) (len=1 cap=1) {
+        (*ast.Field)(0xc0000f6000)({
+         Doc: (*ast.CommentGroup)(<nil>),
+         Names: ([]*ast.Ident) <nil>,
+         Type: (*ast.Ident)(0xc0000e8f40)(someInterface),
+         Tag: (*ast.BasicLit)(<nil>),
+         Comment: (*ast.CommentGroup)(<nil>)
+        })
+       },
+       Closing: (token.Pos) 3063
+      }),
+      Incomplete: (bool) false
+     }),
+     Comment: (*ast.CommentGroup)(<nil>)
+    })
+   },
+   Rparen: (token.Pos) 0
+  })
+ },
+ Scope: (*ast.Scope)(0xc000054c90)(scope 0xc000054c90 {
+	type MyStruct
+	type MyStruct2
+	type MyStruct3
+	type someInterface
+}
+),
+ Imports: ([]*ast.ImportSpec) (len=1 cap=1) {
+  (*ast.ImportSpec)(0xc000079320)({
+   Doc: (*ast.CommentGroup)(<nil>),
+   Name: (*ast.Ident)(<nil>),
+   Path: (*ast.BasicLit)(0xc0000e8ae0)({
+    ValuePos: (token.Pos) 2685,
+    Kind: (token.Token) STRING,
+    Value: (string) (len=54) "\"github.com/matthinrichsen/gokey/tests/anotherPackage\""
+   }),
+   Comment: (*ast.CommentGroup)(<nil>),
+   EndPos: (token.Pos) 0
+  })
+ },
+ Unresolved: ([]*ast.Ident) (len=9 cap=16) {
+  (*ast.Ident)(0xc0000e8b40)(string),
+  (*ast.Ident)(0xc0000e8c00)(int),
+  (*ast.Ident)(0xc0000e8c40)(int),
+  (*ast.Ident)(0xc0000e8ca0)(int),
+  (*ast.Ident)(0xc0000e8d00)(string),
+  (*ast.Ident)(0xc0000e8d20)(string),
+  (*ast.Ident)(0xc0000e8d60)(int),
+  (*ast.Ident)(0xc0000e8da0)(anotherPackage),
+  (*ast.Ident)(0xc0000e8e20)(anotherPackage)
+ },
+ Comments: ([]*ast.CommentGroup) <nil>
+})
