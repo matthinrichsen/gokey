@@ -73,9 +73,8 @@ func fixDirectory(path string) {
 				needsRepair := false
 				for _, e := range a.Elts {
 					switch e.(type) {
-					case *ast.BasicLit:
-						needsRepair = true
-					case *ast.CompositeLit:
+					case *ast.KeyValueExpr:
+					default:
 						needsRepair = true
 					}
 				}
@@ -143,15 +142,8 @@ func fixDirectory(path string) {
 
 			for i, s := range n.Elts {
 				switch s.(type) {
-				case *ast.BasicLit:
-					n.Elts[i] = &ast.KeyValueExpr{
-						Value: s,
-						Key: &ast.Ident{
-							Name: names[i],
-						},
-						Colon: brokenFile.f.Pos(),
-					}
-				case *ast.CompositeLit:
+				case *ast.KeyValueExpr:
+				default:
 					n.Elts[i] = &ast.KeyValueExpr{
 						Value: s,
 						Key: &ast.Ident{
