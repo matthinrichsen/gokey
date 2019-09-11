@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"errors"
+
 	"github.com/matthinrichsen/gokey/tests/anotherPackage"
 )
 
@@ -29,3 +31,6 @@ type MyStruct2 struct {
 type MyStruct3 struct {
 	someInterface
 }
+
+var withinTheSameFile = MyStruct2{MyStruct3{errors.New(`wazzup`)}}
+var withinTheSameFile2 = MyStruct3{errors.New(`wazzup`)}
