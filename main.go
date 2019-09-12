@@ -15,7 +15,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+
+	"github.com/matthinrichsen/gokey/file"
+	"github.com/matthinrichsen/gokey/util"
 )
 
 func main() {
@@ -37,16 +39,10 @@ func fixDirectory(path string) {
 	}
 
 	fileSet := token.NewFileSet()
-	packages := map[string]*types.Info{}
-	structFieldNames := map[string][]string{}
+	sn := util.NewStructFieldNames()
 
 	_ = filepath.Walk(path, func(directory string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
-			return nil
-		}
-
-		astinfo, allFiles, err := compile(directory, fileSet)
-		if err != nil {
 			return nil
 		}
 
@@ -55,85 +51,16 @@ func fixDirectory(path string) {
 			importDir = directory
 		}
 
-		packages[importDir] = astinfo
-		buildOutImports(allFiles, fileSet, packages)
+		astinfo, allFiles, err := compile(directory, fileSet)
+		if err != nil {
+			return nil
+		}
+
+		sn.AddPackage(importDir, astinfo)
+		buildOutImports(allFiles, fileSet, sn)
 
 		for filename, f := range allFiles {
-
-			importsToPaths := map[string]string{}
-			once := sync.Once{}
-			nodesToRepaired := false
-			buildOutImports := func() {
-				nodesToRepaired = true
-				for _, i := range f.Imports {
-					if i.Name != nil {
-						importsToPaths[removeQuotes(i.Name.String())] = removeQuotes(i.Path.Value)
-					}
-					_, value := filepath.Split(removeQuotes(i.Path.Value))
-					importsToPaths[value] = removeQuotes(i.Path.Value)
-				}
-			}
-
-			ast.Inspect(f, func(n ast.Node) bool {
-				a, ok := n.(*ast.CompositeLit)
-				if !ok {
-					return true
-				}
-
-				for i, e := range a.Elts {
-					switch e.(type) {
-					case *ast.KeyValueExpr:
-					default:
-						once.Do(buildOutImports)
-
-						var importReference string
-						var structReference string
-
-						switch t := a.Type.(type) {
-						case *ast.SelectorExpr: // this struct declaration is import from another package
-							structName := t.Sel.String()
-
-							pkg, ok := t.X.(*ast.Ident)
-							if ok {
-								importReference = importsToPaths[removeQuotes(pkg.String())]
-								structReference = importReference + `.` + structName
-							}
-						case *ast.Ident: // this struct declaration is local to the package
-							importReference = importDir
-							structReference = importReference + `.` + t.Name
-						}
-
-						names, ok := structFieldNames[structReference]
-						if !ok {
-							for i := range packages[importReference].Defs {
-								if i.Obj != nil {
-									ts, ok := i.Obj.Decl.(*ast.TypeSpec)
-									if ok {
-										structFieldNames[removeQuotes(importReference)+"."+i.Name] = membersFromTypeSpec(ts)
-									}
-								}
-							}
-							names = structFieldNames[structReference]
-						}
-
-						if len(names) <= i {
-							return true
-						}
-
-						a.Elts[i] = &ast.KeyValueExpr{
-							Value: e,
-							Key: &ast.Ident{
-								Name: names[i],
-							},
-							Colon: f.End(),
-						}
-					}
-				}
-
-				return false
-			})
-
-			if nodesToRepaired {
+			if file.Repair(f, importDir, sn) {
 				wd, _ := os.Getwd()
 				reportFile, err := filepath.Rel(wd, filename)
 				if err != nil {
@@ -148,6 +75,7 @@ func fixDirectory(path string) {
 					formatted = b.Bytes()
 				}
 				ioutil.WriteFile(filename, formatted, info.Mode())
+
 			}
 		}
 		return nil
@@ -217,18 +145,17 @@ func compile(p string, fset *token.FileSet) (*types.Info, map[string]*ast.File, 
 	return info, files, nil
 }
 
-func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, packages map[string]*types.Info) {
+func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, sn util.StructFieldNames) {
 	for _, f := range files {
 		for _, i := range f.Imports {
-			_, ok := packages[i.Path.Value]
-			if ok {
+			if sn.HasPackage(i.Path.Value) {
 				continue
 			}
 
 			info, nextRoundOfFiles, err := compile(filepath.Join(os.Getenv("GOPATH"), "src", removeQuotes(i.Path.Value)), fileSet)
 			if err == nil {
-				packages[i.Path.Value] = info
-				buildOutImports(nextRoundOfFiles, fileSet, packages)
+				sn.AddPackage(i.Path.Value, info)
+				buildOutImports(nextRoundOfFiles, fileSet, sn)
 			}
 		}
 	}
