@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/format"
 	"go/importer"
@@ -14,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -34,9 +36,9 @@ func fixDirectory(path string) {
 		log.Fatal(err)
 	}
 
-	toFix := []brokenFile{}
 	fileSet := token.NewFileSet()
 	packages := map[string]*types.Info{}
+	structFieldNames := map[string][]string{}
 
 	_ = filepath.Walk(path, func(directory string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -57,107 +59,93 @@ func fixDirectory(path string) {
 		buildOutImports(allFiles, fileSet, packages)
 
 		for filename, f := range allFiles {
-			nodesToRepair := []*ast.CompositeLit{}
+
+			importsToPaths := map[string]string{}
+			once := sync.Once{}
+			nodesToRepaired := false
+			buildOutImports := func() {
+				nodesToRepaired = true
+				for _, i := range f.Imports {
+					if i.Name != nil {
+						importsToPaths[removeQuotes(i.Name.String())] = removeQuotes(i.Path.Value)
+					}
+					_, value := filepath.Split(removeQuotes(i.Path.Value))
+					importsToPaths[value] = removeQuotes(i.Path.Value)
+				}
+			}
+
 			ast.Inspect(f, func(n ast.Node) bool {
 				a, ok := n.(*ast.CompositeLit)
 				if !ok {
 					return true
 				}
 
-				needsRepair := false
-				for _, e := range a.Elts {
+				for i, e := range a.Elts {
 					switch e.(type) {
 					case *ast.KeyValueExpr:
 					default:
-						needsRepair = true
+						once.Do(buildOutImports)
+
+						var importReference string
+						var structReference string
+
+						switch t := a.Type.(type) {
+						case *ast.SelectorExpr: // this struct declaration is import from another package
+							structName := t.Sel.String()
+
+							pkg, ok := t.X.(*ast.Ident)
+							if ok {
+								importReference = importsToPaths[removeQuotes(pkg.String())]
+								structReference = importReference + `.` + structName
+							}
+						case *ast.Ident: // this struct declaration is local to the package
+							importReference = importReference
+							structReference = importReference + `.` + t.Name
+						}
+
+						names, ok := structFieldNames[structReference]
+						if !ok {
+							for i := range packages[importReference].Defs {
+								if i.Obj != nil {
+									ts, ok := i.Obj.Decl.(*ast.TypeSpec)
+									if ok {
+										structFieldNames[removeQuotes(importReference)+"."+i.Name] = membersFromTypeSpec(ts)
+									}
+								}
+							}
+						}
+
+						if len(names) < i {
+							return true
+						}
+
+						a.Elts[i] = &ast.KeyValueExpr{
+							Value: e,
+							Key: &ast.Ident{
+								Name: names[i],
+							},
+							Colon: f.End(),
+						}
 					}
 				}
 
-				if needsRepair {
-					nodesToRepair = append(nodesToRepair, a)
-				}
 				return false
 			})
 
-			if len(nodesToRepair) > 0 {
-				toFix = append(toFix, brokenFile{
-					f:             f,
-					filename:      filename,
-					dir:           importDir,
-					mode:          info.Mode(),
-					nodesToRepair: nodesToRepair,
-				})
+			if nodesToRepaired {
+				fmt.Println(filename)
+				b := &bytes.Buffer{}
+				printer.Fprint(b, fileSet, f)
+
+				formatted, err := format.Source(b.Bytes())
+				if err != nil {
+					formatted = b.Bytes()
+				}
+				ioutil.WriteFile(filename, formatted, info.Mode())
 			}
 		}
 		return nil
 	})
-
-	structFieldNames := map[string][]string{}
-	for k, v := range packages {
-		for i := range v.Defs {
-			if i.Obj != nil {
-				ts, ok := i.Obj.Decl.(*ast.TypeSpec)
-				if ok {
-					structFieldNames[removeQuotes(k)+"."+i.Name] = membersFromTypeSpec(ts)
-				}
-			}
-		}
-	}
-
-	for _, brokenFile := range toFix {
-		importsToPaths := map[string]string{}
-		for _, i := range brokenFile.f.Imports {
-			if i.Name != nil {
-				importsToPaths[removeQuotes(i.Name.String())] = removeQuotes(i.Path.Value)
-			}
-			_, value := filepath.Split(removeQuotes(i.Path.Value))
-			importsToPaths[value] = removeQuotes(i.Path.Value)
-		}
-
-		for _, n := range brokenFile.nodesToRepair {
-			var structReference string
-			switch t := n.Type.(type) {
-			case *ast.SelectorExpr: // this struct declaration is import from another package
-				structName := t.Sel.String()
-
-				pkg, ok := t.X.(*ast.Ident)
-				if ok {
-					renamedImport := importsToPaths[removeQuotes(pkg.String())]
-					structReference = renamedImport + `.` + structName
-				}
-			case *ast.Ident: // this struct declaration is local to the package
-				structReference = brokenFile.dir + `.` + t.Name
-			}
-
-			names := structFieldNames[structReference]
-			if len(names) != len(n.Elts) {
-				continue
-			}
-
-			for i, s := range n.Elts {
-				switch s.(type) {
-				case *ast.KeyValueExpr:
-				default:
-					n.Elts[i] = &ast.KeyValueExpr{
-						Value: s,
-						Key: &ast.Ident{
-							Name: names[i],
-						},
-						Colon: brokenFile.f.Pos(),
-					}
-				}
-			}
-		}
-
-		b := &bytes.Buffer{}
-		printer.Fprint(b, fileSet, brokenFile.f)
-
-		formatted, err := format.Source(b.Bytes())
-		if err != nil {
-			formatted = b.Bytes()
-		}
-		ioutil.WriteFile(brokenFile.filename, formatted, brokenFile.mode)
-	}
 }
 
 func membersFromTypeSpec(ts *ast.TypeSpec) []string {
