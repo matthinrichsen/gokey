@@ -99,7 +99,7 @@ func fixDirectory(path string) {
 								structReference = importReference + `.` + structName
 							}
 						case *ast.Ident: // this struct declaration is local to the package
-							importReference = importReference
+							importReference = importDir
 							structReference = importReference + `.` + t.Name
 						}
 
@@ -113,9 +113,10 @@ func fixDirectory(path string) {
 									}
 								}
 							}
+							names = structFieldNames[structReference]
 						}
 
-						if len(names) < i {
+						if len(names) <= i {
 							return true
 						}
 
@@ -133,7 +134,12 @@ func fixDirectory(path string) {
 			})
 
 			if nodesToRepaired {
-				fmt.Println(filename)
+				wd, _ := os.Getwd()
+				reportFile, err := filepath.Rel(wd, filename)
+				if err != nil {
+					reportFile = filename
+				}
+				fmt.Println(reportFile)
 				b := &bytes.Buffer{}
 				printer.Fprint(b, fileSet, f)
 
