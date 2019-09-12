@@ -30,7 +30,7 @@ func fixDirectory(path string) {
 	}
 
 	fileSet := token.NewFileSet()
-	sn := util.NewStructFieldNames()
+	sn := util.NewStructManager()
 
 	_ = filepath.Walk(path, func(directory string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
@@ -103,7 +103,7 @@ func compile(p string, fset *token.FileSet) (*types.Info, map[string]*ast.File, 
 	return info, files, nil
 }
 
-func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, sn util.StructFieldNames) {
+func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, sn util.StructManager) {
 	for _, f := range files {
 		for _, i := range f.Imports {
 			if sn.HasPackage(i.Path.Value) {

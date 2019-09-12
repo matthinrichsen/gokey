@@ -5,28 +5,28 @@ import (
 	"go/types"
 )
 
-type StructFieldNames struct {
+type StructManager struct {
 	packages    map[string]*types.Info
 	defsToNames map[string][]string
 }
 
-func NewStructFieldNames() StructFieldNames {
-	return StructFieldNames{
+func NewStructManager() StructManager {
+	return StructManager{
 		packages:    map[string]*types.Info{},
 		defsToNames: map[string][]string{},
 	}
 }
 
-func (s StructFieldNames) AddPackage(importDir string, pkg *types.Info) {
+func (s StructManager) AddPackage(importDir string, pkg *types.Info) {
 	s.packages[RemoveQuotes(importDir)] = pkg
 }
 
-func (s StructFieldNames) HasPackage(importDir string) bool {
+func (s StructManager) HasPackage(importDir string) bool {
 	_, ok := s.packages[RemoveQuotes(importDir)]
 	return ok
 }
 
-func (s StructFieldNames) Get(pkg, structName string) ([]string, bool) {
+func (s StructManager) Get(pkg, structName string) ([]string, bool) {
 	pkg = RemoveQuotes(pkg)
 	structName = RemoveQuotes(structName)
 	ref := pkg + `.` + structName

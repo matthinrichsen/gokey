@@ -8,7 +8,7 @@ import (
 	"github.com/matthinrichsen/gokey/util"
 )
 
-func Repair(f *ast.File, importDir string, sn util.StructFieldNames) bool {
+func Repair(f *ast.File, importDir string, sn util.StructManager) bool {
 	importsToPaths := map[string]string{}
 	once := sync.Once{}
 	nodesRepared := false
