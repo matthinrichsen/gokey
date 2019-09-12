@@ -37,6 +37,10 @@ func fixDirectory(path string) {
 			return nil
 		}
 
+		if filepath.Dir(directory) == `vendor` {
+			return filepath.SkipDir
+		}
+
 		importDir, err := filepath.Rel(filepath.Join(os.Getenv(`GOPATH`), `src`), directory)
 		if err != nil {
 			importDir = directory
