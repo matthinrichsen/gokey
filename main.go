@@ -37,6 +37,10 @@ func fixDirectory(path string) {
 			return nil
 		}
 
+		if _, folderName := filepath.Split(directory); folderName == `vendor` {
+			return filepath.SkipDir
+		}
+
 		importDir, err := filepath.Rel(filepath.Join(os.Getenv(`GOPATH`), `src`), directory)
 		if err != nil {
 			importDir = directory
@@ -110,7 +114,7 @@ func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, sn util
 				continue
 			}
 
-			info, nextRoundOfFiles, err := compile(filepath.Join(os.Getenv("GOPATH"), "src", removeQuotes(i.Path.Value)), fileSet)
+			info, nextRoundOfFiles, err := compile(filepath.Join(os.Getenv("GOPATH"), "src", util.RemoveQuotes(i.Path.Value)), fileSet)
 			if err == nil {
 				sn.AddPackage(i.Path.Value, info)
 				buildOutImports(nextRoundOfFiles, fileSet, sn)
