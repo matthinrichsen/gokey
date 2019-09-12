@@ -14,7 +14,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/matthinrichsen/gokey/file"
 	"github.com/matthinrichsen/gokey/util"
@@ -22,14 +21,6 @@ import (
 
 func main() {
 	fixDirectory(``)
-}
-
-type brokenFile struct {
-	dir           string
-	filename      string
-	mode          os.FileMode
-	f             *ast.File
-	nodesToRepair []*ast.CompositeLit
 }
 
 func fixDirectory(path string) {
@@ -74,45 +65,12 @@ func fixDirectory(path string) {
 				if err != nil {
 					formatted = b.Bytes()
 				}
-				ioutil.WriteFile(filename, formatted, info.Mode())
 
+				ioutil.WriteFile(filename, formatted, info.Mode())
 			}
 		}
 		return nil
 	})
-}
-
-func membersFromTypeSpec(ts *ast.TypeSpec) []string {
-	st, ok := ts.Type.(*ast.StructType)
-	if !ok || st == nil || st.Fields == nil {
-		return nil
-	}
-
-	names := []string{}
-	for _, field := range st.Fields.List {
-		if len(field.Names) == 0 {
-			id, ok := field.Type.(*ast.Ident)
-			if ok && id.Obj != nil {
-				names = append(names, id.Obj.Name)
-				continue
-			}
-
-			se, ok := field.Type.(*ast.SelectorExpr)
-			if ok {
-				names = append(names, se.Sel.Name)
-				continue
-			}
-		}
-
-		for _, name := range field.Names {
-			names = append(names, name.Name)
-		}
-	}
-	return names
-}
-
-func removeQuotes(s string) string {
-	return strings.TrimSuffix(strings.TrimPrefix(s, `"`), `"`)
 }
 
 func compile(p string, fset *token.FileSet) (*types.Info, map[string]*ast.File, error) {
