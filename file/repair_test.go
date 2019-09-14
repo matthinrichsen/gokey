@@ -37,7 +37,7 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 
 	b := &bytes.Buffer{}
 	printer.Fprint(b, fset, a)
-	assert.Equal(t, expected, b.String())
+	assert.Equal(t, expected, b.String(), "%s%s%s", b.String(), "\n---------------------- VS --------------------\n\n", expected)
 }
 
 func TestFileRepair_SimpleStruct(t *testing.T) {
@@ -116,6 +116,42 @@ import "github.com/matthinrichsen/gokey/tests"
 
 func NewStructOne() tests.AllExportedFields {
 	return tests.AllExportedFields{A: "A", Two: tests.AnotherExpectedFieldStruct{One: 1, Two: 2, Three: 3}}
+}
+`
+
+	assertAST(t, expectation, input, []string{`github.com/matthinrichsen/gokey/tests`})
+}
+
+func TestFileRepair_ComplexReferenceStruct_Newlines(t *testing.T) {
+	input := `package anotherPackage
+
+import "github.com/matthinrichsen/gokey/tests"
+
+func NewStructOne() tests.AllExportedFields {
+	return tests.AllExportedFields{
+		"A",
+		 tests.AnotherExpectedFieldStruct{
+			 1,
+			 2,
+			 3,
+			},
+		}
+}
+`
+
+	expectation := `package anotherPackage
+
+import "github.com/matthinrichsen/gokey/tests"
+
+func NewStructOne() tests.AllExportedFields {
+	return tests.AllExportedFields{
+		A: "A",
+		Two: tests.AnotherExpectedFieldStruct{
+			One: 1,
+			Two: 2,
+			Three: 3,
+		},
+	}
 }
 `
 
