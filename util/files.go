@@ -17,6 +17,19 @@ func CompileFilesInDirectory(directory string, fset *token.FileSet) (*types.Info
 		return nil, nil, err
 	}
 
+	fileList := []*ast.File{}
+	for _, f := range files {
+		fileList = append(fileList, f)
+	}
+
+	info, err := CompileFiles(directory, fset, fileList...)
+	if err != nil {
+		return nil, nil, err
+	}
+	return info, files, nil
+}
+
+func CompileFiles(directory string, fset *token.FileSet, files ...*ast.File) (*types.Info, error) {
 	tc := &types.Config{
 		Importer: importer.Default(),
 	}
@@ -28,17 +41,11 @@ func CompileFilesInDirectory(directory string, fset *token.FileSet) (*types.Info
 		Scopes:     make(map[ast.Node]*types.Scope),
 		Selections: make(map[*ast.SelectorExpr]*types.Selection),
 	}
-
-	fileList := []*ast.File{}
-	for _, f := range files {
-		fileList = append(fileList, f)
-	}
-
-	_, err = tc.Check(directory, fset, fileList, info)
+	_, err := tc.Check(directory, fset, files, info)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return info, files, nil
+	return info, nil
 }
 
 func ParseAllGoFilesInDirectory(directory string, fset *token.FileSet) (map[string]*ast.File, error) {
