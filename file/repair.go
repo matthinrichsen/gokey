@@ -2,7 +2,10 @@ package file
 
 import (
 	"go/ast"
+	"go/token"
+	"log"
 	"path/filepath"
+	"reflect"
 	"sync"
 
 	"golang.org/x/tools/go/ast/astutil"
@@ -26,7 +29,13 @@ func Repair(f *ast.File, importDir string, sn util.StructManager) bool {
 		}
 	}
 
+	parentStructure := map[ast.Node]ast.Node{}
+
+	offset := 0
 	astutil.Apply(f, func(c *astutil.Cursor) bool {
+		parentStructure[c.Node()] = c.Parent()
+		baseOffset := nudgeTokenPositions(c.Node(), int64(offset))
+
 		a, ok := c.Parent().(*ast.CompositeLit)
 		if !ok {
 			return true
@@ -66,17 +75,61 @@ func Repair(f *ast.File, importDir string, sn util.StructManager) bool {
 				return true
 			}
 
+			offset += len(names[c.Index()]) + 2
+			baseOffset = nudgeTokenPositions(expr, int64(len(names[c.Index()])+2))
+
 			c.Replace(&ast.KeyValueExpr{
 				Value: expr,
 				Key: &ast.Ident{
 					Name: names[c.Index()],
 				},
-				Colon: f.End(),
+				Colon: token.Pos(baseOffset + int64(len(names[c.Index()]))),
 			})
+
+			for cur := c.Parent(); cur != nil; cur = parentStructure[cur] {
+				nudgeRightBrace(cur, int64(len(names[c.Index()])+2))
+			}
 		}
 
 		return true
 	}, nil)
 
 	return nodesRepared
+}
+
+func nudgeTokenPositions(i interface{}, offset int64) (baseOff int64) {
+	defer func() {
+		_ = recover()
+	}()
+
+	e := reflect.ValueOf(i).Elem()
+	for i := 0; i < e.NumField(); i++ {
+		func() {
+			defer func() {
+				_ = recover()
+			}()
+			f := e.Field(i)
+
+			switch f.Type().String() {
+			case `token.Pos`:
+				v := f.Int()
+				if v > 0 {
+					if v < baseOff || baseOff == 0 {
+						baseOff = v
+					}
+					f.SetInt(v + offset)
+				}
+			}
+		}()
+	}
+	return baseOff
+}
+
+func nudgeRightBrace(i interface{}, offset int64) {
+	defer func() {
+		_ = recover()
+	}()
+
+	f := reflect.ValueOf(i).Elem().FieldByName(`Rbrace`)
+	f.SetInt(f.Int() + offset)
 }
