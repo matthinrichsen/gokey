@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"sync"
 
+	"golang.org/x/tools/go/ast/astutil"
+
 	"github.com/matthinrichsen/gokey/util"
 )
 
@@ -24,51 +26,57 @@ func Repair(f *ast.File, importDir string, sn util.StructManager) bool {
 		}
 	}
 
-	ast.Inspect(f, func(n ast.Node) bool {
-		a, ok := n.(*ast.CompositeLit)
+	astutil.Apply(f, func(c *astutil.Cursor) bool {
+		parent := c.Parent()
+
+		a, ok := parent.(*ast.CompositeLit)
 		if !ok {
 			return true
 		}
 
-		for i, e := range a.Elts {
-			switch e.(type) {
-			case *ast.KeyValueExpr:
-			default:
-				once.Do(buildOutImports)
-
-				var importReference string
-				var structReference string
-
-				switch t := a.Type.(type) {
-				case *ast.SelectorExpr: // this struct declaration is import from another package
-					structName := t.Sel.String()
-
-					pkg, ok := t.X.(*ast.Ident)
-					if ok {
-						importReference = importsToPaths[util.RemoveQuotes(pkg.String())]
-						structReference = structName
-					}
-				case *ast.Ident: // this struct declaration is local to the package
-					importReference = importDir
-					structReference = t.Name
-				}
-
-				names, ok := sn.Get(importReference, structReference)
-				if !ok || len(names) <= i {
-					return true
-				}
-
-				a.Elts[i] = &ast.KeyValueExpr{
-					Value: e,
-					Key: &ast.Ident{
-						Name: names[i],
-					},
-					Colon: f.End(),
-				}
-			}
+		expr, ok := c.Node().(ast.Expr)
+		if !ok {
+			return true
 		}
 
-		return false
-	})
+		switch expr.(type) {
+		case *ast.KeyValueExpr:
+		default:
+			once.Do(buildOutImports)
+
+			var importReference string
+			var structReference string
+
+			switch t := a.Type.(type) {
+			case *ast.SelectorExpr: // this struct declaration is import from another package
+				structName := t.Sel.String()
+
+				pkg, ok := t.X.(*ast.Ident)
+				if ok {
+					importReference = importsToPaths[util.RemoveQuotes(pkg.String())]
+					structReference = structName
+				}
+			case *ast.Ident: // this struct declaration is local to the package
+				importReference = importDir
+				structReference = t.Name
+			}
+
+			names, ok := sn.Get(importReference, structReference)
+			if !ok || len(names) <= c.Index() || c.Index() == -1 {
+				return true
+			}
+
+			c.Replace(&ast.KeyValueExpr{
+				Value: expr,
+				Key: &ast.Ident{
+					Name: names[c.Index()],
+				},
+				Colon: f.End(),
+			})
+		}
+
+		return true
+	}, nil)
+
 	return nodesRepared
 }
