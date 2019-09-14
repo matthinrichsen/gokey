@@ -27,9 +27,7 @@ func Repair(f *ast.File, importDir string, sn util.StructManager) bool {
 	}
 
 	astutil.Apply(f, func(c *astutil.Cursor) bool {
-		parent := c.Parent()
-
-		a, ok := parent.(*ast.CompositeLit)
+		a, ok := c.Parent().(*ast.CompositeLit)
 		if !ok {
 			return true
 		}
@@ -59,6 +57,8 @@ func Repair(f *ast.File, importDir string, sn util.StructManager) bool {
 			case *ast.Ident: // this struct declaration is local to the package
 				importReference = importDir
 				structReference = t.Name
+			default:
+				log.Printf("%T what is this? %#v %#v", t, expr, c.Parent())
 			}
 
 			names, ok := sn.Get(importReference, structReference)
