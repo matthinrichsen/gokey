@@ -5,10 +5,12 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/matthinrichsen/gokey/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,15 +34,28 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 	info, err := util.CompileFiles(`somepkg`, fset, a)
 	require.NoError(t, err)
 
+	//	spew.Dump(fset.File(a.Pos()))
 	sm.AddPackage(`github.com/matthinrichsen/anotherPackage`, info)
-	assert.True(t, Repair(a, `github.com/matthinrichsen/anotherPackage`, sm))
+	lines, repaired := Repair(a, `github.com/matthinrichsen/anotherPackage`, sm, fset)
+	assert.True(t, repaired)
 
+	spew.Dump(a)
+	//return
+
+	log.Println(lines)
 	fset = token.NewFileSet()
-	fset.AddFile(`testFile.go`, int(a.Pos()), int(a.End()-a.Pos()))
+	fset.AddFile(`testFile.go`, int(a.Pos()), int(a.End()-a.Pos()+1))
+	require.True(t, fset.File(a.Pos()).SetLines(lines))
 
+	//log.Println(fset.File(a.Pos()).Base())
+	//	spew.Dump(fset.File(a.Pos()))
+
+	//	fset.File(a.Pos()).AddLine(2295 - 2141 - 3)
+	//	fset.File(a.Pos()).AddLine(2339 - 2141 - 4)
 	b := &bytes.Buffer{}
 	printer.Fprint(b, fset, a)
 	assert.Equal(t, expected, b.String(), "%s%s%s", b.String(), "\n---------------------- VS --------------------\n\n", expected)
+
 }
 
 func TestFileRepair_SimpleStruct(t *testing.T) {
