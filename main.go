@@ -43,7 +43,7 @@ func fixDirectory(path string) {
 			importDir = directory
 		}
 
-		astinfo, allFiles, err := utils.CompileFilesInDirectory(directory, fileSet)
+		astinfo, allFiles, err := util.CompileFilesInDirectory(directory, fileSet)
 		if err != nil {
 			return nil
 		}
@@ -81,7 +81,7 @@ func buildOutImports(files map[string]*ast.File, fileSet *token.FileSet, sn util
 				continue
 			}
 
-			info, nextRoundOfFiles, err := utils.CompileFilesInDirectory(filepath.Join(os.Getenv("GOPATH"), "src", util.RemoveQuotes(i.Path.Value)), fileSet)
+			info, nextRoundOfFiles, err := util.CompileFilesInDirectory(filepath.Join(os.Getenv("GOPATH"), "src", util.RemoveQuotes(i.Path.Value)), fileSet)
 			if err == nil {
 				sn.AddPackage(i.Path.Value, info)
 				buildOutImports(nextRoundOfFiles, fileSet, sn)
