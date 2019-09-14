@@ -40,3 +40,13 @@ type MyStruct4 struct {
 var withinTheSameFile = MyStruct2{MyStruct3{errors.New(`wazzup`)}}
 var withinTheSameFile2 = MyStruct3{errors.New(`wazzup`)}
 var withinTheSameFile3 = MyStruct4{1, errors.New(`wazzup`)}
+
+type AllExportedFields struct {
+	A   string
+	Two AnotherExpectedFieldStruct
+}
+
+type AnotherExpectedFieldStruct struct {
+	One        int
+	Two, Three int
+}

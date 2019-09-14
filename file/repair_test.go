@@ -19,8 +19,8 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 	sm := util.NewStructManager()
 
 	for _, dir := range definitions {
-		dir = filepath.Join(os.Getenv(`GOPATH`), `src`, dir)
-		info, _, err := util.CompileFilesInDirectory(dir, fset)
+		pathDir := filepath.Join(os.Getenv(`GOPATH`), `src`, dir)
+		info, _, err := util.CompileFilesInDirectory(pathDir, fset)
 		require.NoError(t, err)
 
 		sm.AddPackage(dir, info)
@@ -115,7 +115,7 @@ func NewStructOne() tests.AllExportedFields {
 import "github.com/matthinrichsen/gokey/tests"
 
 func NewStructOne() tests.AllExportedFields {
-	return tests.AllExportedFields{A: "A", tests.AnotherExpectedFieldStruct{One: 1,Two: 2,Three: 3}}
+	return tests.AllExportedFields{A: "A", Two: tests.AnotherExpectedFieldStruct{One: 1, Two: 2, Three: 3}}
 }
 `
 
