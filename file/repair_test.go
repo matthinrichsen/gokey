@@ -5,6 +5,8 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/matthinrichsen/gokey/util"
@@ -12,20 +14,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testAstBeforeAndAfter(t *testing.T, expected, inputFile string) {
+func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 	fset := token.NewFileSet()
-	ast, err := parser.ParseFile(fset, `testfile.go`, []byte(inputFile), parser.ParseComments)
+	sm := util.NewStructManager()
+
+	for _, dir := range definitions {
+		dir = filepath.Join(os.Getenv(`GOPATH`), `src`, dir)
+		info, _, err := util.CompileFilesInDirectory(dir, fset)
+		require.NoError(t, err)
+
+		sm.AddPackage(dir, info)
+	}
+
+	a, err := parser.ParseFile(fset, `testfile.go`, []byte(inputFile), parser.ParseComments)
 	require.NoError(t, err)
 
-	sm := util.NewStructManager()
-	info, err := util.CompileFiles(`tests`, fset, ast)
+	info, err := util.CompileFiles(`somepkg`, fset, a)
 	require.NoError(t, err)
 
 	sm.AddPackage(`github.com/matthinrichsen/anotherPackage`, info)
-	assert.True(t, Repair(ast, `github.com/matthinrichsen/anotherPackage`, sm))
+	assert.True(t, Repair(a, `github.com/matthinrichsen/anotherPackage`, sm))
 
 	b := &bytes.Buffer{}
-	printer.Fprint(b, fset, ast)
+	printer.Fprint(b, fset, a)
 	assert.Equal(t, expected, b.String())
 }
 
@@ -48,7 +59,7 @@ type LastStruct struct {
 var abc = LastStruct{Int: 1}
 `
 
-	testAstBeforeAndAfter(t, expectation, input)
+	assertAST(t, expectation, input, nil)
 }
 
 func TestFileRepair_ComplexStruct(t *testing.T) {
@@ -86,5 +97,27 @@ func NewStructOne() StructOne {
 }
 `
 
-	testAstBeforeAndAfter(t, expectation, input)
+	assertAST(t, expectation, input, nil)
+}
+
+func TestFileRepair_ComplexReferenceStruct(t *testing.T) {
+	input := `package anotherPackage
+
+import "github.com/matthinrichsen/gokey/tests"
+
+func NewStructOne() tests.AllExportedFields {
+	return tests.AllExportedFields{"A", tests.AnotherExpectedFieldStruct{1,2,3}}
+}
+`
+
+	expectation := `package anotherPackage
+
+import "github.com/matthinrichsen/gokey/tests"
+
+func NewStructOne() tests.AllExportedFields {
+	return tests.AllExportedFields{A: "A", tests.AnotherExpectedFieldStruct{One: 1,Two: 2,Three: 3}}
+}
+`
+
+	assertAST(t, expectation, input, []string{`github.com/matthinrichsen/gokey/tests`})
 }
