@@ -33,7 +33,12 @@ func (s StructManager) Get(pkg, structName string) ([]string, bool) {
 
 	_, ok := s.defsToNames[ref]
 	if !ok {
-		for i := range s.packages[pkg].Defs {
+		info, ok := s.packages[pkg]
+		if !ok {
+			return nil, false
+		}
+
+		for i := range info.Defs {
 			if i.Obj != nil {
 				ts, ok := i.Obj.Decl.(*ast.TypeSpec)
 				if ok {
