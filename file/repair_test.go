@@ -35,6 +35,9 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 	sm.AddPackage(`github.com/matthinrichsen/anotherPackage`, info)
 	assert.True(t, Repair(a, `github.com/matthinrichsen/anotherPackage`, sm))
 
+	fset = token.NewFileSet()
+	fset.AddFile(`testFile.go`, int(a.Pos()), int(a.End()-a.Pos()))
+
 	b := &bytes.Buffer{}
 	printer.Fprint(b, fset, a)
 	assert.Equal(t, expected, b.String(), "%s%s%s", b.String(), "\n---------------------- VS --------------------\n\n", expected)
@@ -130,12 +133,12 @@ import "github.com/matthinrichsen/gokey/tests"
 func NewStructOne() tests.AllExportedFields {
 	return tests.AllExportedFields{
 		"A",
-		 tests.AnotherExpectedFieldStruct{
-			 1,
-			 2,
-			 3,
-			},
-		}
+		tests.AnotherExpectedFieldStruct{
+			1,
+			2,
+			3,
+		},
+	}
 }
 `
 
