@@ -12,17 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFileRepair_SimpleStruct(t *testing.T) {
-	file := `package anotherPackage
-
-type LastStruct struct {
-	Int int
-}
-
-var abc = LastStruct{1}
-`
+func testAstBeforeAndAfter(t *testing.T, expected, inputFile string) {
 	fset := token.NewFileSet()
-	ast, err := parser.ParseFile(fset, `testfile.go`, []byte(file), parser.ParseComments)
+	ast, err := parser.ParseFile(fset, `testfile.go`, []byte(inputFile), parser.ParseComments)
 	require.NoError(t, err)
 
 	sm := util.NewStructManager()
@@ -34,8 +26,20 @@ var abc = LastStruct{1}
 
 	b := &bytes.Buffer{}
 	printer.Fprint(b, fset, ast)
+	assert.Equal(t, expected, b.String())
+}
 
-	expectedString := `package anotherPackage
+func TestFileRepair_SimpleStruct(t *testing.T) {
+	input := `package anotherPackage
+
+type LastStruct struct {
+	Int int
+}
+
+var abc = LastStruct{1}
+`
+
+	expectation := `package anotherPackage
 
 type LastStruct struct {
 	Int int
@@ -43,11 +47,12 @@ type LastStruct struct {
 
 var abc = LastStruct{Int: 1}
 `
-	assert.Equal(t, expectedString, b.String())
+
+	testAstBeforeAndAfter(t, expectation, input)
 }
 
 func TestFileRepair_ComplexStruct(t *testing.T) {
-	file := `package anotherPackage
+	input := `package anotherPackage
 
 type StructOne struct {
 	Name string
@@ -63,21 +68,8 @@ func NewStructOne() StructOne {
 	return StructOne{"ThisIsMyName", NestedStruct{1,2,3}}
 }
 `
-	fset := token.NewFileSet()
-	ast, err := parser.ParseFile(fset, `testfile.go`, []byte(file), parser.ParseComments)
-	require.NoError(t, err)
 
-	sm := util.NewStructManager()
-	info, err := util.CompileFiles(`tests`, fset, ast)
-	require.NoError(t, err)
-
-	sm.AddPackage(`github.com/matthinrichsen/anotherPackage`, info)
-	assert.True(t, Repair(ast, `github.com/matthinrichsen/anotherPackage`, sm))
-
-	b := &bytes.Buffer{}
-	printer.Fprint(b, fset, ast)
-
-	expectedString := `package anotherPackage
+	expectation := `package anotherPackage
 
 type StructOne struct {
 	Name	string
@@ -93,5 +85,6 @@ func NewStructOne() StructOne {
 	return StructOne{Name: "ThisIsMyName", A: NestedStruct{One: 1, Two: 2, Three: 3}}
 }
 `
-	assert.Equal(t, expectedString, b.String())
+
+	testAstBeforeAndAfter(t, expectation, input)
 }
