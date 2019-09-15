@@ -20,7 +20,7 @@ func assertPrint(t *testing.T, expected, input string) {
 
 	actual, err := PrintRepair(a, RepairInfo{Lines: lines})
 	require.NoError(t, err)
-	assert.Equal(t, expected, b.String(), "%s\n---------------------- VS --------------------\n\n%s", string(actual), expected)
+	assert.Equal(t, expected, string(actual), "%s\n---------------------- VS --------------------\n\n%s", string(actual), expected)
 }
 
 func TestPrint_ShouldFormat(t *testing.T) {

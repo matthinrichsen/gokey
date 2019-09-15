@@ -1,7 +1,6 @@
 package file
 
 import (
-	"bytes"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -37,9 +36,9 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 	repairInfo, repaired := Repair(a, `github.com/matthinrichsen/anotherPackage`, sm, fset)
 	assert.True(t, repaired)
 
-	b := bytes.NewBuffer(nil)
-	require.NoError(t, PrintRepair(b, a, repairInfo))
-	assert.Equal(t, expected, b.String(), "%s\n---------------------- VS --------------------\n\n%s", b.String(), expected)
+	actual, err := PrintRepair(a, repairInfo)
+	require.NoError(t, err)
+	assert.Equal(t, expected, string(actual), "%s\n---------------------- VS --------------------\n\n%s", string(actual), expected)
 }
 
 func TestFileRepair_SimpleStruct(t *testing.T) {
@@ -52,14 +51,7 @@ type LastStruct struct {
 var abc = LastStruct{1}
 `
 
-	expectation := `package anotherPackage
-
-type LastStruct struct {
-	Int int
-}
-
-var abc = LastStruct{Int: 1}
-`
+	expectation := "package anotherPackage\n\ntype LastStruct struct {\n\tInt int\n}\n\nvar abc = LastStruct{Int: 1}\n"
 
 	assertAST(t, expectation, input, nil)
 }
@@ -82,23 +74,7 @@ func NewStructOne() StructOne {
 }
 `
 
-	expectation := `package anotherPackage
-
-type StructOne struct {
-	Name	string
-	A	NestedStruct
-}
-type NestedStruct struct {
-	One	int
-	Two	int
-	Three	int
-}
-
-func NewStructOne() StructOne {
-	return StructOne{Name: "ThisIsMyName", A: NestedStruct{One: 1, Two: 2, Three: 3}}
-}
-`
-
+	expectation := "package anotherPackage\n\ntype StructOne struct {\n\tName string\n\tA    NestedStruct\n}\ntype NestedStruct struct {\n\tOne   int\n\tTwo   int\n\tThree int\n}\n\nfunc NewStructOne() StructOne {\n\treturn StructOne{Name: \"ThisIsMyName\", A: NestedStruct{One: 1, Two: 2, Three: 3}}\n}\n"
 	assertAST(t, expectation, input, nil)
 }
 
@@ -112,14 +88,7 @@ func NewStructOne() tests.AllExportedFields {
 }
 `
 
-	expectation := `package anotherPackage
-
-import "github.com/matthinrichsen/gokey/tests"
-
-func NewStructOne() tests.AllExportedFields {
-	return tests.AllExportedFields{A: "A", Two: tests.AnotherExpectedFieldStruct{One: 1, Two: 2, Three: 3}}
-}
-`
+	expectation := "package anotherPackage\n\nimport \"github.com/matthinrichsen/gokey/tests\"\n\nfunc NewStructOne() tests.AllExportedFields {\n\treturn tests.AllExportedFields{A: \"A\", Two: tests.AnotherExpectedFieldStruct{One: 1, Two: 2, Three: 3}}\n}\n"
 
 	assertAST(t, expectation, input, []string{`github.com/matthinrichsen/gokey/tests`})
 }
@@ -141,21 +110,8 @@ func NewStructOne() tests.AllExportedFields {
 }
 `
 
-	expectation := `package anotherPackage
+	expectation := "package anotherPackage\n\nimport \"github.com/matthinrichsen/gokey/tests\"\n\nfunc NewStructOne() tests.AllExportedFields {\n\treturn tests.AllExportedFields{\n\t\tA: \"A\",\n\t\tTwo: tests.AnotherExpectedFieldStruct{\n\t\t\tOne:   1,\n\t\t\tTwo:   2,\n\t\t\tThree: 3,\n\t\t},\n\t}\n}\n"
 
-import "github.com/matthinrichsen/gokey/tests"
-
-func NewStructOne() tests.AllExportedFields {
-	return tests.AllExportedFields{
-		A:	"A",
-		Two: tests.AnotherExpectedFieldStruct{
-			One:	1,
-			Two:	2,
-			Three:	3,
-		},
-	}
-}
-`
 	assertAST(t, expectation, input, []string{`github.com/matthinrichsen/gokey/tests`})
 }
 
