@@ -39,7 +39,7 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 
 	b := bytes.NewBuffer(nil)
 	require.NoError(t, PrintRepair(b, a, repairInfo))
-	assert.Equal(t, expected, b.String(), "%s%s%s", b.String(), "\n---------------------- VS --------------------\n\n", expected)
+	assert.Equal(t, expected, b.String(), "%s\n---------------------- VS --------------------\n\n%s", b.String(), expected)
 }
 
 func TestFileRepair_SimpleStruct(t *testing.T) {

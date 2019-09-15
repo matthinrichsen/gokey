@@ -28,26 +28,11 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 		}
 	}
 
-	lines := map[int]token.Pos{}
-	linePos := []token.Pos{}
-	fsetFile := fset.File(f.Pos())
-
-	for i := 0; i < fsetFile.Size(); i++ {
-		l := fsetFile.Line(token.Pos(fsetFile.Base() + i))
-		if _, ok := lines[l]; !ok {
-			lines[l] = token.Pos(fsetFile.Base() + i)
-			linePos = append(linePos, lines[l]-1)
-		}
-	}
-
-	adjustedLines := []int{}
-	for _, l := range linePos {
-		adjustedLines = append(adjustedLines, int(l)-fsetFile.Base())
-	}
-
+	tokenFile := fset.File(f.Pos())
+	linePos := getLineTokenPositions(tokenFile)
 	parentStructure := map[ast.Node]ast.Node{}
-
 	offset := 0
+
 	astutil.Apply(f, func(c *astutil.Cursor) bool {
 		parentStructure[c.Node()] = c.Parent()
 		nudgeTokenPositions(c.Node(), int64(offset))
@@ -118,13 +103,8 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 		return true
 	}, nil)
 
-	adjustedLines = []int{}
-	for _, l := range linePos {
-		adjustedLines = append(adjustedLines, int(l)-fsetFile.Base()+1)
-	}
-
 	rp := RepairInfo{
-		Lines: adjustedLines,
+		Lines: getLineOffsets(linePos, tokenFile),
 	}
 	return rp, nodesRepared
 }
