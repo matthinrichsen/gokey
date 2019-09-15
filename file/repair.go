@@ -103,7 +103,8 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 			k := &ast.KeyValueExpr{
 				Value: expr,
 				Key: &ast.Ident{
-					Name: names[c.Index()],
+					NamePos: expr.Pos() - 2 - token.Pos(len(names[c.Index()])),
+					Name:    names[c.Index()],
 				},
 				Colon: expr.Pos() - 2,
 			}
