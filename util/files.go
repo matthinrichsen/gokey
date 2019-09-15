@@ -6,9 +6,6 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 )
 
 func CompileFilesInDirectory(directory string, fset *token.FileSet) (*types.Info, map[string]*ast.File, error) {
@@ -49,38 +46,15 @@ func CompileFiles(directory string, fset *token.FileSet, files ...*ast.File) (*t
 }
 
 func ParseAllGoFilesInDirectory(directory string, fset *token.FileSet) (map[string]*ast.File, error) {
+	pkgs, err := parser.ParseDir(fset, directory, nil, parser.ParseComments)
+	if err != nil {
+		return nil, err
+	}
 	files := map[string]*ast.File{}
-	_ = filepath.Walk(directory, func(filename string, info os.FileInfo, err error) error {
-		if info == nil {
-			return nil
+	for _, p := range pkgs {
+		for filename, astFile := range p.Files {
+			files[filename] = astFile
 		}
-		if info.IsDir() {
-			if directory != filename {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-
-		if filepath.Ext(filename) != `.go` {
-			return nil
-		}
-
-		bytes, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return err
-		}
-
-		f, err := parser.ParseFile(fset, filename, bytes, parser.ParseComments)
-		if err != nil {
-			return nil
-		}
-
-		files[filename] = f
-		return nil
-	})
-
+	}
 	return files, nil
 }
