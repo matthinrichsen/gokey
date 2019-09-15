@@ -8,8 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/ast/astutil"
 
 	"github.com/matthinrichsen/gokey/util"
 )
@@ -218,4 +220,24 @@ func TestNudging(t *testing.T) {
 		assert.Equal(t, tc.expected.End(), tc.input.End())
 		assert.Equal(t, tc.expected, tc.input)
 	}
+}
+
+func debug(t *testing.T, input string) {
+
+	fset := token.NewFileSet()
+
+	a, err := parser.ParseFile(fset, `testfile.go`, []byte(input), parser.ParseComments)
+	require.NoError(t, err)
+	debugPositions(a)
+}
+
+func debugPositions(a *ast.File) {
+	spew.Dump(a)
+	astutil.Apply(a, func(c *astutil.Cursor) bool {
+		n := c.Node()
+		if n != nil {
+			//		fmt.Println(n.Pos())
+		}
+		return true
+	}, nil)
 }
