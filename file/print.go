@@ -1,17 +1,18 @@
 package file
 
 import (
+	"bytes"
 	"go/ast"
+	"go/format"
 	"go/printer"
 	"go/token"
-	"io"
 )
 
 type RepairInfo struct {
 	Lines []int
 }
 
-func PrintRepair(out io.Writer, repaired *ast.File, repairInfo RepairInfo) error {
+func PrintRepair(repaired *ast.File, repairInfo RepairInfo) ([]byte, error) {
 	fset := token.NewFileSet()
 	start := repaired.Pos()
 	end := repaired.End()
@@ -21,5 +22,11 @@ func PrintRepair(out io.Writer, repaired *ast.File, repairInfo RepairInfo) error
 		Mode:     printer.TabIndent,
 		Tabwidth: 8,
 	}
-	return cfg.Fprint(out, fset, repaired)
+	b := bytes.NewBuffer(nil)
+	err := cfg.Fprint(b, fset, repaired)
+	if err != nil {
+		return nil, err
+	}
+
+	return format.Source(b.Bytes())
 }

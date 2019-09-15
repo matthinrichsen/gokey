@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -60,14 +59,13 @@ func fixDirectory(path string) {
 
 				fmt.Println(reportFile)
 
-				b := &bytes.Buffer{}
-				err = file.PrintRepair(b, f, repairInfo)
+				repairedByes, err := file.PrintRepair(f, repairInfo)
 				if err != nil {
 					fmt.Printf("issue repairing %s: %v\n", filename, err)
 					continue
 				}
 
-				ioutil.WriteFile(filename, b.Bytes(), info.Mode())
+				ioutil.WriteFile(filename, repairedByes, info.Mode())
 			}
 		}
 		return nil

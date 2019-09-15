@@ -1,7 +1,6 @@
 package file
 
 import (
-	"bytes"
 	"go/parser"
 	"go/token"
 	"testing"
@@ -19,9 +18,9 @@ func assertPrint(t *testing.T, expected, input string) {
 	linePositions := getLineTokenPositions(tokenFile)
 	lines := getLineOffsets(linePositions, tokenFile)
 
-	b := bytes.NewBuffer(nil)
-	PrintRepair(b, a, RepairInfo{Lines: lines})
-	assert.Equal(t, expected, b.String(), "%s\n---------------------- VS --------------------\n\n%s", b.String(), expected)
+	actual, err := PrintRepair(a, RepairInfo{Lines: lines})
+	require.NoError(t, err)
+	assert.Equal(t, expected, b.String(), "%s\n---------------------- VS --------------------\n\n%s", string(actual), expected)
 }
 
 func TestPrint_ShouldFormat(t *testing.T) {
