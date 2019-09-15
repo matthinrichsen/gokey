@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"go/ast"
 	"go/parser"
-	"go/printer"
 	"go/token"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/matthinrichsen/gokey/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/matthinrichsen/gokey/util"
 )
 
 func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
@@ -37,17 +37,9 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 	lines, repaired := Repair(a, `github.com/matthinrichsen/anotherPackage`, sm, fset)
 	assert.True(t, repaired)
 
-	fset = token.NewFileSet()
-	require.True(t, fset.AddFile(`testFile.go`, int(a.Pos()), int(a.End()-a.Pos()+1)).SetLines(lines))
-
-	b := &bytes.Buffer{}
-	cfg := printer.Config{
-		Mode:     printer.TabIndent,
-		Tabwidth: 8,
-	}
-	cfg.Fprint(b, fset, a)
+	b := bytes.NewBuffer(nil)
+	require.NoError(t, PrintRepair(b, a, RepairInfo{Lines: lines}))
 	assert.Equal(t, expected, b.String(), "%s%s%s", b.String(), "\n---------------------- VS --------------------\n\n", expected)
-
 }
 
 func TestFileRepair_SimpleStruct(t *testing.T) {
