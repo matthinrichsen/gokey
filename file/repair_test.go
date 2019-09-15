@@ -34,11 +34,11 @@ func assertAST(t *testing.T, expected, inputFile string, definitions []string) {
 	require.NoError(t, err)
 
 	sm.AddPackage(`github.com/matthinrichsen/anotherPackage`, info)
-	lines, repaired := Repair(a, `github.com/matthinrichsen/anotherPackage`, sm, fset)
+	repairInfo, repaired := Repair(a, `github.com/matthinrichsen/anotherPackage`, sm, fset)
 	assert.True(t, repaired)
 
 	b := bytes.NewBuffer(nil)
-	require.NoError(t, PrintRepair(b, a, RepairInfo{Lines: lines}))
+	require.NoError(t, PrintRepair(b, a, repairInfo))
 	assert.Equal(t, expected, b.String(), "%s%s%s", b.String(), "\n---------------------- VS --------------------\n\n", expected)
 }
 

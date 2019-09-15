@@ -12,7 +12,7 @@ import (
 	"github.com/matthinrichsen/gokey/util"
 )
 
-func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.FileSet) ([]int, bool) {
+func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.FileSet) (RepairInfo, bool) {
 	importsToPaths := map[string]string{}
 	once := sync.Once{}
 	nodesRepared := false
@@ -122,7 +122,11 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 	for _, l := range linePos {
 		adjustedLines = append(adjustedLines, int(l)-fsetFile.Base()+1)
 	}
-	return adjustedLines, nodesRepared
+
+	rp := RepairInfo{
+		Lines: adjustedLines,
+	}
+	return rp, nodesRepared
 }
 
 func nudgeTokenPositions(i interface{}, offset int64) {
