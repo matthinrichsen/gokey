@@ -10,7 +10,6 @@ import (
 
 	"golang.org/x/tools/go/ast/astutil"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/matthinrichsen/gokey/util"
 )
 
@@ -126,50 +125,50 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 
 	adjustedLines = []int{}
 	for _, l := range linePos {
-		adjustedLines = append(adjustedLines, int(l)-fsetFile.Base())
+		adjustedLines = append(adjustedLines, int(l)-fsetFile.Base()+1)
 	}
 	return adjustedLines, nodesRepared
 }
 
-func recordOriginalPositions() {
-	_ = map[interface{}]int64{}
-}
-
-func nudgeTokenPositions(i interface{}, offset int64) (baseOff int64) {
-	//	return
+func nudgeTokenPositions(i interface{}, offset int64) {
 	defer func() {
 		_ = recover()
 	}()
 
 	e := reflect.ValueOf(i).Elem()
-	for i := 0; i < e.NumField(); i++ {
-		baseOff = nudgeTokenPos(e.Field(i), offset, baseOff)
-	}
-	return baseOff
+	nudgeFields(e, offset)
 }
 
-func nudgeTokenPos(f reflect.Value, offset, baseOff int64) (r int64) {
-	//	return
+func nudgeFields(f reflect.Value, offset int64) {
 	defer func() {
 		_ = recover()
-		r = baseOff
+	}()
+
+	for i := 0; i < f.NumField(); i++ {
+		field := f.Field(i)
+		switch k := field.Kind(); k {
+		case reflect.Struct, reflect.Ptr, reflect.Interface:
+			nudgeTokenPositions(field.Interface(), offset)
+		}
+
+		nudgeTokenPos(field, offset)
+	}
+}
+
+func nudgeTokenPos(f reflect.Value, offset int64) {
+	defer func() {
+		_ = recover()
 	}()
 
 	switch f.Type().String() {
 	case `token.Pos`:
-		v := f.Int()
-		if v > 0 {
-			if v < baseOff || baseOff == 0 {
-				baseOff = v
-			}
+		if v := f.Int(); v > 0 {
 			f.SetInt(v + offset)
 		}
 	}
-	return baseOff
 }
 
 func nudgeRightBrace(i interface{}, offset int64) {
-	//	return
 	defer func() {
 		_ = recover()
 	}()
