@@ -115,6 +115,65 @@ func NewStructOne() tests.AllExportedFields {
 	assertAST(t, expectation, input, []string{`github.com/matthinrichsen/gokey/tests`})
 }
 
+func TestFileRepair_InlineInternals(t *testing.T) {
+	input := `package tests
+
+import (
+	"errors"
+
+	"github.com/matthinrichsen/gokey/tests/anotherPackage"
+)
+
+type someInterface interface {
+	Error() string
+}
+
+type MyStruct struct {
+	a int
+	b int
+	c int
+
+	m   map[string]string
+	arr []int
+
+	MyStruct2
+
+	anotherPackage.LastStruct
+	LS anotherPackage.LastStruct
+}
+
+type MyStruct2 struct {
+	AnotherStruct MyStruct3
+}
+
+type MyStruct3 struct {
+	someInterface
+}
+
+type MyStruct4 struct {
+	a     int16
+	error // embedding native go type
+}
+
+var withinTheSameFile = MyStruct2{MyStruct3{errors.New("wazzup")}}
+var withinTheSameFile2 = MyStruct3{errors.New("wazzup")}
+var withinTheSameFile3 = MyStruct4{1, errors.New("wazzup")}
+
+type AllExportedFields struct {
+	A   string
+	Two AnotherExpectedFieldStruct
+}
+
+type AnotherExpectedFieldStruct struct {
+	One        int
+	Two, Three int
+}
+`
+
+	expected := "package tests\n\nimport (\n\t\"errors\"\n\n\t\"github.com/matthinrichsen/gokey/tests/anotherPackage\"\n)\n\ntype someInterface interface {\n\tError() string\n}\n\ntype MyStruct struct {\n\ta int\n\tb int\n\tc int\n\n\tm   map[string]string\n\tarr []int\n\n\tMyStruct2\n\n\tanotherPackage.LastStruct\n\tLS anotherPackage.LastStruct\n}\n\ntype MyStruct2 struct {\n\tAnotherStruct MyStruct3\n}\n\ntype MyStruct3 struct {\n\tsomeInterface\n}\n\ntype MyStruct4 struct {\n\ta     int16\n\terror // embedding native go type\n}\n\nvar withinTheSameFile = MyStruct2{AnotherStruct: MyStruct3{someInterface: errors.New(\"wazzup\")}}\nvar withinTheSameFile2 = MyStruct3{someInterface: errors.New(\"wazzup\")}\nvar withinTheSameFile3 = MyStruct4{a: 1, error: errors.New(\"wazzup\")}\n\ntype AllExportedFields struct {\n\tA   string\n\tTwo AnotherExpectedFieldStruct\n}\ntype AnotherExpectedFieldStruct struct {\n\tOne        int\n\tTwo, Three int\n}\n"
+	assertAST(t, expected, input, []string{"github.com/matthinrichsen/gokey/tests/anotherPackage"})
+}
+
 func TestNudging(t *testing.T) {
 	tests := []struct {
 		input    ast.Node
