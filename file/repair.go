@@ -83,6 +83,7 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 			}
 
 			offset += nudge
+			nudgeDeclarationsAfter(f, nudge, expr.Pos())
 			nudgeTokenPositions(expr, int64(nudge))
 
 			k := &ast.KeyValueExpr{
@@ -130,6 +131,8 @@ func nudgeFields(f reflect.Value, offset int64) {
 			if ok {
 				nudgeTokenPositions(field.Interface(), offset)
 			}
+		case reflect.Slice, reflect.Map, reflect.Array:
+			nudgeFields(reflect.ValueOf(i), offset)
 		}
 
 		nudgeTokenPos(field, offset)
@@ -156,4 +159,12 @@ func nudgeRightBrace(i interface{}, offset int64) {
 
 	f := reflect.ValueOf(i).Elem().FieldByName(`Rbrace`)
 	f.SetInt(f.Int() + offset)
+}
+
+func nudgeDeclarationsAfter(f *ast.File, offset int, cursor token.Pos) {
+	for _, d := range f.Decls {
+		if d.Pos() > cursor {
+			nudgeTokenPositions(d, int64(offset))
+		}
+	}
 }
