@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
-	"go/format"
-	"go/printer"
 	"go/token"
 	"io/ioutil"
 	"log"
@@ -52,22 +50,24 @@ func fixDirectory(path string) {
 		buildOutImports(allFiles, fileSet, sn)
 
 		for filename, f := range allFiles {
-			if file.Repair(f, importDir, sn) {
+			repairInfo, needsRepair := file.Repair(f, importDir, sn, fileSet)
+			if needsRepair {
 				wd, _ := os.Getwd()
 				reportFile, err := filepath.Rel(wd, filename)
 				if err != nil {
 					reportFile = filename
 				}
-				fmt.Println(reportFile)
-				b := &bytes.Buffer{}
-				printer.Fprint(b, fileSet, f)
 
-				formatted, err := format.Source(b.Bytes())
+				fmt.Println(reportFile)
+
+				b := &bytes.Buffer{}
+				err = file.PrintRepair(b, f, repairInfo)
 				if err != nil {
-					formatted = b.Bytes()
+					fmt.Printf("issue repairing %s: %v\n", filename, err)
+					continue
 				}
 
-				ioutil.WriteFile(filename, formatted, info.Mode())
+				ioutil.WriteFile(filename, b.Bytes(), info.Mode())
 			}
 		}
 		return nil
