@@ -33,7 +33,12 @@ func (s StructManager) Get(pkg, structName string) ([]string, bool) {
 
 	_, ok := s.defsToNames[ref]
 	if !ok {
-		for i := range s.packages[pkg].Defs {
+		info, ok := s.packages[pkg]
+		if !ok {
+			return nil, false
+		}
+
+		for i := range info.Defs {
 			if i.Obj != nil {
 				ts, ok := i.Obj.Decl.(*ast.TypeSpec)
 				if ok {
@@ -57,8 +62,12 @@ func membersFromTypeSpec(ts *ast.TypeSpec) []string {
 	for _, field := range st.Fields.List {
 		if len(field.Names) == 0 {
 			id, ok := field.Type.(*ast.Ident)
-			if ok && id.Obj != nil {
-				names = append(names, id.Obj.Name)
+			if ok {
+				if id.Obj != nil {
+					names = append(names, id.Obj.Name)
+				} else {
+					names = append(names, id.Name)
+				}
 				continue
 			}
 
