@@ -3,7 +3,6 @@ package file
 import (
 	"go/ast"
 	"go/token"
-	"log"
 	"path/filepath"
 	"reflect"
 	"sync"
@@ -31,13 +30,13 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 
 	lines := map[int]token.Pos{}
 	linePos := []token.Pos{}
-	//pos := map[ast.Node]token.Pos{}
 	fsetFile := fset.File(f.Pos())
+
 	for i := 0; i < fsetFile.Size(); i++ {
 		l := fsetFile.Line(token.Pos(fsetFile.Base() + i))
 		if _, ok := lines[l]; !ok {
 			lines[l] = token.Pos(fsetFile.Base() + i)
-			linePos = append(linePos, lines[l])
+			linePos = append(linePos, lines[l]-1)
 		}
 	}
 
@@ -46,18 +45,12 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 		adjustedLines = append(adjustedLines, int(l)-fsetFile.Base())
 	}
 
-	log.Println(adjustedLines)
-
 	parentStructure := map[ast.Node]ast.Node{}
-
-	spew.Dump(lines)
-	spew.Dump(linePos)
-	defer spew.Dump(linePos)
 
 	offset := 0
 	astutil.Apply(f, func(c *astutil.Cursor) bool {
 		parentStructure[c.Node()] = c.Parent()
-		_ = nudgeTokenPositions(c.Node(), int64(offset))
+		nudgeTokenPositions(c.Node(), int64(offset))
 
 		a, ok := c.Parent().(*ast.CompositeLit)
 		if !ok {
@@ -86,6 +79,7 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 					importReference = importsToPaths[util.RemoveQuotes(pkg.String())]
 					structReference = structName
 				}
+
 			case *ast.Ident: // this struct declaration is local to the package
 				importReference = importDir
 				structReference = t.Name
@@ -99,13 +93,13 @@ func Repair(f *ast.File, importDir string, sn util.StructManager, fset *token.Fi
 			nudge := len(names[c.Index()]) + 2
 			for i, l := range linePos {
 				if l > c.Node().Pos() {
-					log.Println(i, int(l)-fsetFile.Base(), `nudging`, nudge)
 					linePos[i] = linePos[i] + token.Pos(nudge)
 				}
 			}
 
 			offset += nudge
-			_ = nudgeTokenPositions(expr, int64(nudge))
+			nudgeTokenPositions(expr, int64(nudge))
+
 			k := &ast.KeyValueExpr{
 				Value: expr,
 				Key: &ast.Ident{
@@ -134,9 +128,7 @@ func nudgeTokenPositions(i interface{}, offset int64) {
 	defer func() {
 		_ = recover()
 	}()
-
-	e := reflect.ValueOf(i).Elem()
-	nudgeFields(e, offset)
+	nudgeFields(reflect.ValueOf(i).Elem(), offset)
 }
 
 func nudgeFields(f reflect.Value, offset int64) {
@@ -148,7 +140,11 @@ func nudgeFields(f reflect.Value, offset int64) {
 		field := f.Field(i)
 		switch k := field.Kind(); k {
 		case reflect.Struct, reflect.Ptr, reflect.Interface:
-			nudgeTokenPositions(field.Interface(), offset)
+			i := field.Interface()
+			_, ok := i.(ast.Node)
+			if ok {
+				nudgeTokenPositions(field.Interface(), offset)
+			}
 		}
 
 		nudgeTokenPos(field, offset)
